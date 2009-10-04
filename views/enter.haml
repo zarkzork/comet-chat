@@ -1,0 +1,31 @@
+#room
+  #header.grid_12
+    #room_link.accent.grid_6.alpha
+      - link_to_chat="localhost:9292/#{@room.hexdigest}"
+      %a{:href => link_to_chat}= |
+      link_to_chat |
+    #room_topic.accent.grid_6.omega
+      =@room.topic
+    %ol#mates
+  #chat.grid_12
+    %ol
+  #footer.grid_12
+    %input#chat_input{:type => "text"}
+#room_enter.prefix_3.grid_6.suffix_3
+  .name_box_topic
+    %small You're about to enter room with topic:
+    %span.accent=@room.topic
+  %form.name_box
+    %input#room_hexdigest{:type => "hidden", |
+    :value => @room.hexdigest} |
+    %label Say your name:
+    %input#name_input_box{:type => "text"}
+    %input#enter_chatroom{:type => "submit", |
+    :value => "Enter!"} |
+  - if @room.mates.length>0
+    %p lot's of cool folks already chatting there
+    %ol
+      - @room.mates.each do |mate|
+        %li= mate.name
+#loading
+  %p Chat is loading. wait a little.

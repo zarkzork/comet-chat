@@ -1,0 +1,31 @@
+%html
+  %head
+    %title zark-zork comet-based online webchat
+
+    %link{:type => "text/css",
+          :rel => "stylesheet",
+	  :media => "screen",
+	  :href => "css/reset.css"}
+    %link{:type => "text/css",
+          :rel => "stylesheet",
+	  :media => "screen",
+	  :href => "css/960.css"}
+    %link{:type => "text/css",
+          :rel => "stylesheet",
+	  :media => "screen",
+	  :href => "css/text.css"}
+    %link{:type => "text/css",
+          :rel => "stylesheet",
+	  :media => "screen",
+	  :href => "css/main.css"}
+
+    %script{:type => "text/javascript",
+            :src => "js/jquery.js"}
+    %script{:type => "text/javascript",
+            :src => "js/typer.js"}
+    %script{:type => "text/javascript",
+            :src => "js/chat.js"}
+
+  %body
+    .container_12
+      = yield
