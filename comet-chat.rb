@@ -10,7 +10,7 @@ require 'comet'
 require 'events'
 
 DataMapper.setup(:default,
-                 "sqlite3:///#{ Dir.pwd}/test.db")
+                 ENV['DATABASE_URL'] || "sqlite3:///#{ Dir.pwd}/test.db")
 DataMapper.auto_migrate!
 
 class Comet_chat < Sinatra::Base
