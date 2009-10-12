@@ -16,7 +16,7 @@ class Active_room
     room_mates=Mate.all('room.id' => @room_id)
     mate=room_mates.first(:name => name)
     if !mate
-      mate=Mate.create(:name => name)
+      mate=Mate.create(:name => name, :room_id => @room_id)
       room=Room.get(@room_id)
       room.mates << mate
       room.save
