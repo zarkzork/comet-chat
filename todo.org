@@ -1,0 +1,11 @@
+* interface
+  home page
+  svg?
+  chat
+* texts
+  home page text
+* on enter event
+* on leave event
+* add final flag to message
+* add topic event
+  
