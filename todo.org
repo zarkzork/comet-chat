@@ -4,8 +4,12 @@
   chat
 * texts
   home page text
-* on enter event
-* on leave event
+* Events
+  Events are objects that user client supposed to show to
+  users. Each event has process method wich should store needed things
+  to database.
+** On enter/leave event
 * add final flag to message
 * add topic event
-  
+* tests
+** TODO write tests for json api
