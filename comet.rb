@@ -1,7 +1,6 @@
 require 'monitor'
 require 'digest/md5'
 
-
 class Active_room
   def initialize(room)
     @room_id=room.id

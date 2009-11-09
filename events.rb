@@ -9,6 +9,9 @@ class Event
     @author=session.mate
     @created_at=Time.now
   end
+
+  def process
+  end
   
   def to_json(*a)
     json_hash.to_json(*a)
