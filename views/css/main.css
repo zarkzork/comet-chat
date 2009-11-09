@@ -1,0 +1,70 @@
+/* html5 stuff */
+section, article, aside, header, footer, nav, dialog, figure { display:block; }
+
+/* header style */
+header{
+    background-color: #333;
+    color: #fff;
+    margin-bottom: 10px;
+    padding-top: 10px;
+}
+
+h1{
+    text-align: center;
+}
+
+/* mates section */
+#mates ul{
+    padding: 15px;
+}
+#mates ul li{
+    font-size: 75%;
+    display: inline;
+    margin-right: 10px;
+    background-color: #666;
+    padding: 3px;
+    -moz-border-radius: 4px;
+}
+
+/* message style */
+.message{
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.message .from{
+    color: #666;
+}
+
+.message .from:after{
+    content: ":";
+}
+
+/* input style */
+#input_box input{
+    background: inherit;
+    color: inherit;
+    border: 1px solid #fff;
+    -moz-border-radius: 4px;
+}
+
+
+#input_box{
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;    
+}
+
+#input_line{
+    width: 80%;
+    padding-left: 5px;
+}
+
+#send_button{
+    width: 5%;
+}
