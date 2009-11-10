@@ -9,24 +9,17 @@
   </head>
   <body>
     <header>
-      <h1 id="topic">tpc</h1>
+      <div id="topic_helper">room topic:</div>
+      <input type="text" value="" id="topic" class="opaque"/>
       <div id="mates">
 	<ul>
-	  <li>zarkzork</li>
-	  <li>wewiorka</li>
 	</ul>
       </div>
     </header>
-    <section id="chat">
-      <ul>
-	<li class="message">
-	  <span class="from">zarkzork</span>
-	  <span class="message_body">Test.</span>
-	</li>
-	<li class="message">
-	  <span class="from">wewiorka</span>
-	  <span class="message_body">ack: Test.</span>
-	</li>
+    <section>
+      <ul id="chat">
+      </ul>
+      <ul id="typers">
       </ul>
     </section>
     <section id="input_box">
