@@ -74,26 +74,34 @@ class Comet_chat < Sinatra::Base
     end
     session=active_room.enter(name)
     @sessions[session.hexdigest]=session
+    enter_event=Mate_event.new(session, :enter)
+    session.active_room.post_event(enter_event)
     {
-      'session'=> session.hexdigest,
-      'result' => 'ok'
+      'session' => session.hexdigest,
+      'result'  => 'ok'
     }.to_json
   end
 
   get '/json/mates' do
-    room=get_session(params[:session]).active_room.room
+    session=get_session(params[:session])
+    room=session.active_room.room
     mates=Array.new
     room.mates.each do |mate|
       mates << mate
     end
     {
       'result' => 'ok',
+      'self_id' => session.mate_id,
       'mates' => mates
     }.to_json
   end
 
   get '/json/get' do
-    event=get_session(params[:session]).get_event
+    event=nil
+    session=get_session(params[:session])
+    if(session)
+      event=session.get_event 
+    end
     return {'result' => 'timeout'}.to_json if !event
     {
       'result' => 'ok',

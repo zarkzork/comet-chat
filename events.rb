@@ -20,12 +20,32 @@ class Event
   def json_hash
     {
       'type' => self.class.name,
-      'author' => @author.name,
+      'author' => @author.id,
       'time' => @created_at.to_i
     }    
   end
 end
 
+class Mate_event < Event
+  attr :status
+
+  def initialize(session, status)
+    super(session)
+    @status=status
+  end
+  
+  def to_json(*a)
+    json_hash.to_json(*a)
+  end
+
+  protected
+  def json_hash
+    hash=super
+    hash['status']=@status
+    hash['mate']=@author
+    hash
+  end
+end
 
 class Text_event < Event
   attr :message

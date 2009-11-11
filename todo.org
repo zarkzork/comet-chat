@@ -1,7 +1,9 @@
 * interface
-  home page
-  svg?
-  chat
+** home page
+   ---
+** chat
+*** TODO if room.getEvent() returns error
+    then check if it is timeout error then retry, else => error
 * texts
   home page text
 * Events

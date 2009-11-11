@@ -1,58 +1,107 @@
-/* global */
-.container_12{
-}
+/* html5 stuff */
+section, article, aside, header, footer, nav, dialog, figure { display:block; }
 
-.accent{
-    font-family: Georgia,serif;
-    font-size: 25px;
-}
-
-/* enter the room */
-.name_box{
-    background-color: #ff0000;
-    padding: 10px;
-}
-
-.name_box_topic{
-    line-height:0.9;
-}
-
-#room_enter{
-    margin-top: 40px;
-}
-
-/* room */
-#header{
-    background-color: #ff0000;
-    height: 10%;
-}
-
-#room_link a{
-    margin-left: 20px;
-}
-
-#mates{
-    list-style: none;
-}
-#mates li{
+.opaque{
     display: inline;
+    color: inherit;
+    background: none;
+    font: inherit;
+    border: none;
+    text-align: inherit;
+    padding: 0;
+    margin: 0;
+    heigth: inherit;
+    line-heigth: inherit;
+    vertical-align: inherit;
+    
 }
 
-#chat{
-    overflow:auto;
-    height:85%;
-}
-
-#footer{
-    height: 5%;
-    background-color: #ff0000;
-}
-
-#footer input{
+/* header style */
+#topic_helper{
+    position: relative;
     width: 100%;
+    text-align: center;
+    font-size: 75%;
+    color: #666;
 }
 
-/* chatroom style */
-#room_enter, #room{
-    display:none;
+header{
+    background-color: #333;
+    color: #fff;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    text-align: center;
+}
+
+#topic{
+    width: 100%;
+    /* font-size: 200%; */
+    margin-bottom: 20px;
+}
+
+/* mates section */
+#mates ul{
+    padding-bottom: 15px;
+}
+#mates ul li{
+    font-size: 75%;
+    display: inline;
+    margin-right: 5px;
+    margin-left: 5px;
+    background-color: #666;
+    padding: 3px;
+    -moz-border-radius: 4px;
+}
+
+/* message style */
+.message{
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.message .from{
+    color: #666;
+    margin-right: 5px;
+}
+
+.message .from:after{
+    content: ":";
+}
+
+#typers .message{
+    color: #aaa;
+}
+
+#errors{
+    text-align: center;
+    color: #f00;
+    font-size: 125%;
+}
+/* input style */
+#input_box input{
+    background: inherit;
+    color: inherit;
+    border: 1px solid #fff;
+    -moz-border-radius: 4px;
+}
+
+
+#input_box{
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;    
+}
+
+#input_line{
+    width: 80%;
+    padding-left: 5px;
+}
+
+#send_button{
+    width: 5%;
 }
