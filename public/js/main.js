@@ -326,5 +326,8 @@ function typer(id, cb){
     });
 }
 
-$(function(){new Room(document.location.hash.slice(1),
-		      "dummy"+Math.floor(Math.random()*100));});
+$(function(){
+    
+    new Room(document.location.hash.slice(1),
+		      "dummy"+Math.floor(Math.random()*100));
+  });

@@ -1,6 +1,31 @@
 /* html5 stuff */
 section, article, aside, header, footer, nav, dialog, figure { display:block; }
 
+#chat_section{
+    display: none;
+}
+
+#enter_section{
+    position: absolute;
+    left:0px;
+    right:0px;
+    top:0px;
+    bottom:0px;
+    background-color: #666;
+    color: #fff;
+}
+
+#enter_section form{
+    position: absolute;
+    heigth: 30%;
+    top: 35%;
+    width: 30%;
+    left: 35%;
+    background-color: #333;
+    padding: 20px;
+    -moz-border-radius: 10px;
+}
+
 .opaque{
     display: inline;
     color: inherit;
@@ -79,7 +104,7 @@ header{
     font-size: 125%;
 }
 /* input style */
-#input_box input{
+input{
     background: inherit;
     color: inherit;
     border: 1px solid #fff;
