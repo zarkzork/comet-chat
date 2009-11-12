@@ -1,3 +1,5 @@
+comet online zarkzork-based html5 webchat
+it's so techy please don't break it.
 * interface
 ** home page
    ---
@@ -15,3 +17,9 @@
 * add topic event
 * tests
 ** TODO write tests for json api
+* zark-zork joke machine
+  Let server create very rare messages something like.
+  server: i'm so tired of reading logs. I'wish someone said that i'm
+  so cool and nobody did. And if someone did, i could not tell nobody
+  becouse they say i should keep your privasy. I't so hard beeing
+  server.
