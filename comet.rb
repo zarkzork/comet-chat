@@ -66,14 +66,13 @@ class Active_session
   end
 
   def get_event
-    event=nil
-    @event_queue.synchronize {
-      begin
-        event=nil
+    begin
+      event=nil
+      @event_queue.synchronize {
         @cv.wait(WAIT_TIMEOUT) if @event_queue.empty?
         event=@event_queue.pop if !@event_queue.empty?
-      end while (event!=nil&&@mate_id==event.author.id)
-    }
+      }
+    end while (event!=nil&&@mate_id==event.author.id)
     event
   end
 end

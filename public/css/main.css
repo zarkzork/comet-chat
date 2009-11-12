@@ -17,13 +17,29 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
 
 #enter_section form{
     position: absolute;
-    heigth: 30%;
     top: 35%;
     width: 30%;
     left: 35%;
     background-color: #333;
     padding: 20px;
     -moz-border-radius: 10px;
+}
+
+#chat_section{
+}
+
+#chat_section .chat_list{
+    padding-top:10px;
+    padding-bottom: 20px;
+    top: 90px;
+    bottom: 40px;
+    position: absolute;
+    overflow-y: auto;
+    left: 0px;
+    right: 0px;
+}
+
+#chat{
 }
 
 .opaque{
@@ -35,32 +51,32 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
     text-align: inherit;
     padding: 0;
     margin: 0;
-    heigth: inherit;
-    line-heigth: inherit;
+    line-height: inherit;
     vertical-align: inherit;
     
 }
 
 /* header style */
 #topic_helper{
-    position: relative;
-    width: 100%;
-    text-align: center;
     font-size: 75%;
     color: #666;
 }
 
-header{
+#chat_section header{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
     background-color: #333;
     color: #fff;
     margin-bottom: 10px;
     padding-top: 10px;
     text-align: center;
+    height: 80px;
 }
 
 #topic{
     width: 100%;
-    /* font-size: 200%; */
     margin-bottom: 20px;
 }
 
@@ -68,6 +84,7 @@ header{
 #mates ul{
     padding-bottom: 15px;
 }
+
 #mates ul li{
     font-size: 75%;
     display: inline;
@@ -113,13 +130,15 @@ input{
 
 
 #input_box{
+    height: 20px;
     position: absolute;
     bottom: 0px;
     left: 0px;
     right: 0px;
     padding: 10px;
     background-color: #333;
-    color: #fff;    
+    color: #fff;
+    overflow: hidden;
 }
 
 #input_line{

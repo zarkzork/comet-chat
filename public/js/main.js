@@ -7,7 +7,7 @@ function Mate(id, name){
 
 /* message is representation of the event to be shown on the message board */
 /* from may be null, in such case message will be treated as error */
-/* types of message: typing, message, error */
+/* types of message: typer, message, error */
 function Message(from, text, type){
   this.from=from;
   this.text=text;
@@ -47,17 +47,19 @@ function Room(id, name){
   this.self=null;
   /* session keeps session id that is needed in every network operation */
   this.session=null;
+  /* queue of messages to be send over network */
+  this.message_queue=[];
+  /* true if request is being sent */
+  this.request_processing=false;
   this.topic=new Topic("tst");
   this.messages=new Messages();
   this.mates=new Mates([]);
   this.makeInputBox(function(value, isFinal){
 		      if(isFinal){
 			self.clearInputBox();
-			self.postMessage(value);
 		      }
-		      if(console){
-			console.log(value+":"+isFinal);
-		      }
+		      self.postMessage(value, isFinal);
+
 		    });
   this.topic.onChange=
     function(value, isFinal){
@@ -69,6 +71,9 @@ function Room(id, name){
 	     function(){
 	       self.getMates(
 		 function(){
+		   $("#connecting").hide();
+		   $("#chat_section").show();
+		   $("#input_line").focus();	
 		   self.startProcessing(
 		     function(event){
 		       self.process(event);
@@ -80,11 +85,16 @@ function Room(id, name){
 }
 
 Room.prototype={
+  scrollDownChat: function(){
+    var height=$("#chat_section .chat_list *").height();
+    $("#chat_section .chat_list").get(0).scrollTop=height;
+  },
   /* enters to room and gets session id */
   enter: function(name, cb){
     var self=this;
     $.ajax({
 	     type: "GET",
+	     cache: false,
 	     url: "/json/"+this.room_id+"/enter",
 	     data: "name="+name,
 	     dataType: "json",
@@ -101,28 +111,71 @@ Room.prototype={
 	     }
 	   });
   },
-  postMessage: function(text){
-    this.messages.add(new Message(this.self, text, "message"));
-    $.ajax({
-	     type: "GET",
-	     url: "/json/message",
-	     data: "session="+this.session+"&"+
-	       "message="+text,
-	     dataType: "json",
-	     success: function(data){
-	       if(data.result!='ok'){
-		 self.showError("Can't send the message.");
-	       }
-	     },
-	     error: function(XMLHttpRequest, textStatus, errorThrown){
-	       self.showError("Can't send the message. ("+textStatus+")");
-	     }
-	   });
+  /* requests are processed one after another to not let the typer
+   events come after real message, maybe there shoud be timeout for
+   typer event */
+  postMessage: function(text, isFinal){
+    var self=this;
+    console.log(self);
+    var type= isFinal?"message":"typer";
+    this.message_queue
+      .push({ /* this property is needed just for postMessage() */
+	      typer: true,
+	      /* standart jquery ajax properties */
+	      type: "GET",
+	      cache: false,
+	      url: "/json/"+type,
+	      data: "session="+this.session+"&"+
+		"message="+text,
+	      dataType: "json",
+	      success: function(data){
+		console.log("done");
+		if(data.result!='ok'){
+		  self.showError("Can't send the message.");
+		}
+		self.messages.add(new Message(self.self,
+					      text,
+					      type));
+		self.scrollDownChat();
+		if(self.message_queue.length==0){
+		  self.request_processing=false;
+		}else{
+		  self.processQueue();
+		}
+	      },
+	      error: function(XMLHttpRequest,
+			      textStatus,
+			      errorThrown){
+		console.log("error");
+		self.showError("Can't send the message. ("+
+			       textStatus+")");
+		if(self.message_queue.length==0){
+		  self.request_processing=false;
+		}else{
+		  self.processQueue();
+		}
+	      }
+	    });
+    this.processQueue();    
+  },
+  processQueue: function(){
+    if(!this.request_processing){
+      this.request_processing=true;
+      $.ajax(this.message_queue.shift());
+    }else{
+      /* here we now that last element is unprocessed and if it */
+      /* "typer" event we can remove it with new one. */
+      if(this.message_queue.length>0 &&
+	 this.message_queue[this.message_queue.length-1].typer){
+	this.message_queue.pop();
+      }
+    }
   },
   getMates: function(cb){
     var self=this;
     $.ajax({
 	     type: "GET",
+	     cache: false,
 	     url: "/json/mates",
 	     data: "session="+this.session,
 	     dataType: "json",
@@ -148,26 +201,35 @@ Room.prototype={
     $.ajax({
 	     type: "GET",
 	     url: "/json/get",
+	     cache: false,
 	     data: "session="+this.session,
 	     dataType: "json",
 	     success: function(data){
 	       if(data.result=="timeout"){
-		 self.startProcessing(cb);
+		 continueProcessing();
 		 return;
 	       }
 	       cb&&cb(data.event);
-	       self.startProcessing(cb);
+	       continueProcessing();
 	     },
 	     error: function(XMLHttpRequest, textStatus, errorThrown){
-	       self.startProcessing(cb);
+	       continueProcessing();
 	     }
 	   });
+    function continueProcessing(){
+      self.startProcessing(cb);
+    }
   },
   process: function(event){
+    var mate=null;
     switch(event.type){
     case "Message_event":
-      var mate=this.mates.get(event.author);
+      mate=this.mates.get(event.author);
       this.messages.add(new Message(mate, event.message, "message"));
+      break;
+    case "Typer_event":
+       mate=this.mates.get(event.author);
+      this.messages.add(new Message(mate, event.message, "typer"));
       break;
     case "Mate_event":
       switch(event.status){
@@ -183,6 +245,7 @@ Room.prototype={
     default:
       throw "unsoported Event type.";
     }
+    this.scrollDownChat();
   },
   showError: function(text){
     var message=
@@ -265,6 +328,7 @@ Messages.prototype={
     var li=message.getLi();
     switch(message.type){
     case "message":
+      $("#"+"typer_"+message.from.id).remove();
       $("#chat").append(li.attr("id", message.id));
       break;
     case "typer":
@@ -274,6 +338,12 @@ Messages.prototype={
 	var prev=old_typer.prev();
 	old_typer.after(li);
 	old_typer.remove();
+	setTimeout(
+	  function(){
+	    li.fadeOut("slow", function(){
+			 li.remove();
+		       });
+		   }, 10000);
       }else{
 	$("#typers").append(li);
       }
@@ -291,9 +361,7 @@ Messages.prototype={
  @id onKeypress event. isFinal is false if last key is
  not enter*/
 function typer(id, cb){
-  var value_send=$(id).attr("value");
   var timeout=-1;
-  
   $(id).keyup(
     function(e){
       var value=$(id).attr("value");
@@ -301,9 +369,8 @@ function typer(id, cb){
 	clearTimeout(timeout);
       }
       if(e.which==13){
-	if(value!=""&&value!=value_send){
+	if(value!=""){
 	  cb&&cb(value, true);
-	  value_send=value;
 	}
       }else{
 	if(value.length%5==0){
@@ -312,22 +379,27 @@ function typer(id, cb){
 	  timeout=setTimeout(
 	    function(){
 	      cb&&cb(value, false);
-	    }, 1000);
+	    }, 200);
 	}
       }
     });
   $(id).change(
     function(){
       var value=$(id).attr("value");
-      if(value!=""&&value!=value_send){
+      if(value!=""){
 	cb&&cb(value, true);
-	value_send=value;
       }
     });
 }
 
 $(function(){
-    
-    new Room(document.location.hash.slice(1),
-		      "dummy"+Math.floor(Math.random()*100));
+    $("#enter_section form").submit(
+      function(){
+	$("#enter_section").hide();
+	$("#connecting").show();
+	new Room(document.location.hash.slice(1),
+		 $("#mate_name").attr("value"));
+	return false;
+      });
+    $("#mate_name").focus();
   });

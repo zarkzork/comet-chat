@@ -8,11 +8,11 @@
     <script type="text/javascript" src="js/main.js"></script>
   </head>
   <body>
-    <section id="enter_section">
-      <form>
+    <section id="enter_section"> 
+     <form>
 	<label>enter you name</label>
 	<input type="text" value="" id="mate_name"/>
-	<input type="button" value="go" id="enter_room"/>  
+	<input type="submit" value="go" id="enter_room"/>  
       </form>
     </section>
     <section id="chat_section">
@@ -24,7 +24,7 @@
 	  </ul>
 	</div>
       </header>
-      <section>
+      <section class="chat_list">
 	<ul id="chat">
 	</ul>
 	<ul id="typers">
@@ -33,10 +33,13 @@
 	</ul>
       </section>
       <section id="input_box">
-	<input type="text" value="text" id="input_line"/>
+	<input type="text" value="" id="input_line"/>
 	<input type="button" value="send" id="send_button" />
       </section>
     </section>
+    <secction id="connecting">
+      <h1>be patient, i'm connecting to server very far away.</h1>
+    </secction>
     <noscript>
       <h1>you have to enable javascipt to use this.</h1>
     </noscript>
