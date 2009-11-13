@@ -103,6 +103,7 @@ class Comet_chat < Sinatra::Base
       event=session.get_event 
     end
     return {'result' => 'timeout'}.to_json if !event
+    puts "sending to "+session.mate.name+" from "+event.author.name
     {
       'result' => 'ok',
       'event' => event
@@ -117,5 +118,15 @@ class Comet_chat < Sinatra::Base
     session.active_room.post_event(message_event)
     {'result' => 'ok'}.to_json
   end
+
+  get '/json/typer' do
+    session=get_session(params[:session])
+    message=params[:message]
+    message=sanitize message
+    typer_event=Typer_event.new(session, message)
+    session.active_room.post_event(typer_event)
+    {'result' => 'ok'}.to_json
+  end
+  
 end
   
