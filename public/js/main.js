@@ -55,17 +55,14 @@ function Room(id, name){
   this.messages=new Messages();
   this.mates=new Mates([]);
   this.makeInputBox(function(value, isFinal){
+		      self.postMessage(value, isFinal);
 		      if(isFinal){
 			self.clearInputBox();
 		      }
-		      self.postMessage(value, isFinal);
-
 		    });
   this.topic.onChange=
     function(value, isFinal){
-      if(console){
-	console.log(value+":"+isFinal);
-      }
+      console&&console.log(value+":"+isFinal);
     };
   this.enter(name,
 	     function(){
@@ -116,7 +113,7 @@ Room.prototype={
    typer event */
   postMessage: function(text, isFinal){
     var self=this;
-    console.log(self);
+    console&&console.log(self);
     var type= isFinal?"message":"typer";
     this.message_queue
       .push({ /* this property is needed just for postMessage() */
@@ -129,7 +126,7 @@ Room.prototype={
 		"message="+text,
 	      dataType: "json",
 	      success: function(data){
-		console.log("done");
+		console&&console.log("done");
 		if(data.result!='ok'){
 		  self.showError("Can't send the message.");
 		}
@@ -146,7 +143,7 @@ Room.prototype={
 	      error: function(XMLHttpRequest,
 			      textStatus,
 			      errorThrown){
-		console.log("error");
+		console&&console.log("error");
 		self.showError("Can't send the message. ("+
 			       textStatus+")");
 		if(self.message_queue.length==0){
@@ -362,22 +359,30 @@ Messages.prototype={
  not enter*/
 function typer(id, cb){
   var timeout=-1;
+  $(id).keydown(
+    function(e){
+      var value=$(id).attr("value");
+      if(e.which==13){
+      	if(value!=""){
+	  console&&console.log("kd");
+	  cb&&cb(value, true);
+	}
+      }
+    });
   $(id).keyup(
     function(e){
       var value=$(id).attr("value");
       if(timeout!=-1){
 	clearTimeout(timeout);
       }
-      if(e.which==13){
-	if(value!=""){
-	  cb&&cb(value, true);
-	}
-      }else{
+      if(e.which!=13){
 	if(value.length%5==0){
+	  console&&console.log("up1");
 	  cb&&cb(value, false);
 	}else{
 	  timeout=setTimeout(
 	    function(){
+	      console&&console.log("up2");
 	      cb&&cb(value, false);
 	    }, 200);
 	}
@@ -387,6 +392,7 @@ function typer(id, cb){
     function(){
       var value=$(id).attr("value");
       if(value!=""){
+	console&&console.log("sub");
 	cb&&cb(value, true);
       }
     });

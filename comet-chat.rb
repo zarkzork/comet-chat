@@ -5,10 +5,12 @@ require 'sinatra'
 require 'json'
 require 'haml'
 require 'sanitize'
-#aplication stuff
+# aplication stuff
 require 'model'
 require 'comet'
 require 'events'
+# run tests before start
+require 'tests'
 
 DataMapper.setup(:default,
                  ENV['DATABASE_URL'] || "sqlite3:///#{ Dir.pwd}/test.db")
