@@ -46,6 +46,11 @@ class Activity_tracker
     end
   end
 
+  def done(key)
+    @hash.delete key
+    @action.call key
+  end
+
   def active(id)
     # debug output
     puts Time.now.to_s+' key '+id.to_s+' now active'

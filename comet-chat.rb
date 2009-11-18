@@ -73,9 +73,10 @@ class Comet_chat < Sinatra::Base
 
   get '/json/:room/leave' do
     room=params[:room]
-    session=get_session(room, params[:session])
-    session.active_room.post_event Mate_event.new(session.name, :left)
-    session.active_room.remove session.hexdigest
+    session_digest=params[:session]
+    session=get_session(room, session_digest )
+    @activity_tracker.done({:room => room,
+                               :session => session_digest})
   end
   
   get '/json/:room/mates' do
