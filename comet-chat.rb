@@ -38,7 +38,6 @@ class Comet_chat < Sinatra::Base
     @active_rooms={}
     @activity_tracker=Activity_tracker.new do |hash|
       session=get_session(hash[:room], hash[:session])
-      puts session.inspect
       session.active_room.post_event Mate_event.new(session.name, :left)
       session.active_room.remove session.hexdigest
     end
@@ -72,6 +71,13 @@ class Comet_chat < Sinatra::Base
     }.to_json
   end
 
+  get '/json/:room/leave' do
+    room=params[:room]
+    session=get_session(room, params[:session])
+    session.active_room.post_event Mate_event.new(session.name, :left)
+    session.active_room.remove session.hexdigest
+  end
+  
   get '/json/:room/mates' do
     room=params[:room]
     session=get_session(room, params[:session])

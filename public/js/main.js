@@ -59,6 +59,7 @@ function Room(id, name){
     function(value, isFinal){
       console&&console.log(value+":"+isFinal);
     };
+  $(window).unload(function(){self.leave();});
   this.enter(name,
 	     function(){
 	       self.getMates(
@@ -101,6 +102,15 @@ Room.prototype={
 	     error: function(XMLHttpRequest, textStatus, errorThrown){
 	       self.showError("Can't enter the room. ("+textStatus+")");
 	     }
+	   });
+  },
+  leave: function(){
+    $.ajax({
+	     type: "GET",
+	     cache: false,
+	     url: "/json/"+this.room_id+"/leave",
+	     data: "session="+this.session,
+	     async: false
 	   });
   },
   /* requests are processed one after another to not let the typer
