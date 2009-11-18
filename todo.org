@@ -1,6 +1,7 @@
 comet online zarkzork-based html5 webchat
 it's so techy please don't break it.
 * Thread safe
+  add mutex on all operations that change class variables
 * make logging asynchronous
 * interface
 ** home page
@@ -9,13 +10,14 @@ it's so techy please don't break it.
 *** TODO if room.getEvent() returns error
     then check if it is timeout error then retry, else => error
 * texts
-  home page text
+** title
+   it's a online comet-based html5 zarkzork web-chat now with ***
+** home page text
 * Events
   Events are objects that user client supposed to show to
   users. Each event has process method wich should store needed things
   to database.
 ** On enter/leave event
-* add final flag to message
 * add topic event
 * tests
 ** TODO write tests for json api

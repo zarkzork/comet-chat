@@ -48,7 +48,7 @@ class Comet_chat < Sinatra::Base
     @active_rooms.each{|r| result+=r.inspect+"\n"}
     result
   end
-
+  
   get '/json/:room/enter' do
     room=params[:room]
     name=params[:name]
@@ -131,4 +131,7 @@ class Comet_chat < Sinatra::Base
     {'result' => 'ok'}.to_json
   end
   
+  get '/:room' do
+    erb :chat
+  end
 end
