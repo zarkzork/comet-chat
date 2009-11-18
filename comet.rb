@@ -2,30 +2,37 @@ require 'monitor'
 require 'digest/md5'
 
 class Active_room
-  def initialize(room)
-    @room_id=room.id
+  def initialize
     @sessions=Hash.new
   end
 
-  def room
-    Room.get(@room_id)
-  end
-
   def enter(name)
-    room_mates=Mate.all('room.id' => @room_id)
-    mate=room_mates.first(:name => name)
-    if !mate
-      mate=Mate.create(:name => name, :room_id => @room_id)
-      room=Room.get(@room_id)
-      room.mates << mate
-      room.save
-    end
-    session=Active_session.new(self, mate)
+    session=Active_session.new(self, name)
     @sessions[session.hexdigest]=session
   end
 
   def [](session_id)
     @sessions[session_id]
+  end
+
+  def names
+    result=[]
+    @sessions.each_value do |session|
+      result.push session.name
+    end
+    result
+  end
+  
+  def contains_name?(name)
+    result=false
+    @sessions.each_value do |session|
+      result=true if session.name==name
+    end
+    result
+  end
+
+  def remove(session_id)
+    @sessions.delete session_id
   end
 
   def post_event(event)
@@ -38,24 +45,21 @@ end
 
 class Active_session
   attr :hexdigest
-  attr :mate_id
   attr :active_room
+  attr :name
+  
   WAIT_TIMEOUT=30
 
-  def initialize(active_room, mate)
-    @mate_id=mate.id
-    @hexdigest=
-      Digest::MD5.hexdigest(Time.new.to_i.to_s+
-                            'salty'+
-                            self.object_id.to_s)
+  def initialize(active_room, name)
     @active_room=active_room
     @event_queue=Array.new
     @event_queue.extend(MonitorMixin)
     @cv=@event_queue.new_cond
-  end
-
-  def mate
-    Mate.get(@mate_id)
+    @name=name
+    @hexdigest=
+      Digest::MD5.hexdigest(Time.new.to_i.to_s+
+                            'salty'+
+                            self.object_id.to_s)
   end
 
   def post_event(event)
@@ -65,14 +69,24 @@ class Active_session
     }
   end
 
+  # sleep while there is no events or author of events is session
+  # owner. end if none of this happend return error after timeout.
   def get_event
+    event=nil
+    finish_time=start_time=Time.now;
+    time_to_sleep=0
     begin
       event=nil
-      @event_queue.synchronize {
-        @cv.wait(WAIT_TIMEOUT) if @event_queue.empty?
+      @event_queue.synchronize do
+        time_to_sleep=WAIT_TIMEOUT-(finish_time-start_time)
+        if time_to_sleep<0
+          break
+        end
+        @cv.wait(time_to_sleep) if @event_queue.empty?
         event=@event_queue.pop if !@event_queue.empty?
-      }
-    end while (event!=nil&&@mate_id==event.author.id)
+        finish_time=Time.now
+      end
+    end while (event!=nil&&(@name==event.author))
     event
   end
 end

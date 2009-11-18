@@ -6,15 +6,9 @@ require 'json'
 require 'haml'
 require 'sanitize'
 # aplication stuff
-require 'model'
 require 'comet'
 require 'events'
-# run tests before start
-require 'tests'
-
-DataMapper.setup(:default,
-                 ENV['DATABASE_URL'] || "sqlite3:///#{ Dir.pwd}/test.db")
-DataMapper.auto_migrate!
+require 'activity_tracker'
 
 class Comet_chat < Sinatra::Base
   enable :static
@@ -31,35 +25,31 @@ class Comet_chat < Sinatra::Base
       Sanitize.clean(string)
     end
 
-    def get_session(session_digest)
+    def get_session(room_digest, session_digest)
+      validate room_digest
       validate session_digest
-      @sessions[session_digest]
+      result=@active_rooms[room_digest][session_digest]
+      throw :halt, [503, { 'result' => 'error'}.to_json] if !result
+      result
     end
   end
 
   def initialize
-    room=Room.create(:topic => 'Test-room')
-    active_room=Active_room.new(room)
-    @active_rooms={room.hexdigest => active_room}
-    @sessions=Hash.new
+    @active_rooms={}
+    @activity_tracker=Activity_tracker.new do |hash|
+      session=get_session(hash[:room], hash[:session])
+      puts session.inspect
+      session.active_room.post_event Mate_event.new(session.name, :left)
+      session.active_room.remove session.hexdigest
+    end
   end
 
   get '/' do
     result="Rooms:"
     @active_rooms.each{|r| result+=r.inspect+"\n"}
-    result+="sessions:"
-    @sessions.each{|s| result+=s.inspect+"\n"}
     result
   end
 
-  get '/:room' do
-    room_digest=params[:room]
-    validate room_digest
-    @room=Room.first(:hexdigest => room_digest)
-    throw :halt, [404, "room not found"] if !@room
-    haml :enter
-  end
-  
   get '/json/:room/enter' do
     room=params[:room]
     name=params[:name]
@@ -67,16 +57,14 @@ class Comet_chat < Sinatra::Base
     validate name
     active_room=@active_rooms[room]
     if !active_room
-      if db_room=Room.first(:hexdigest => room)
-        active_room=Active_room.new(db_room) if db_room
+      @active_rooms[room]=active_room=Active_room.new
+    else
+      if active_room.contains_name? name
+        return {'result' => 'duplicate'}.to_json
       end
     end
-    if !active_room
-      return {'result' => 'error'}.to_json;
-    end
     session=active_room.enter(name)
-    @sessions[session.hexdigest]=session
-    enter_event=Mate_event.new(session, :enter)
+    enter_event=Mate_event.new(name, :enter)
     session.active_room.post_event(enter_event)
     {
       'session' => session.hexdigest,
@@ -84,51 +72,56 @@ class Comet_chat < Sinatra::Base
     }.to_json
   end
 
-  get '/json/mates' do
-    session=get_session(params[:session])
-    room=session.active_room.room
-    mates=Array.new
-    room.mates.each do |mate|
-      mates << mate
-    end
+  get '/json/:room/mates' do
+    room=params[:room]
+    session=get_session(room, params[:session])
+    return {
+      'result' => 'error'
+    }.json if !session
+    room=session.active_room
+    mates=room.names    
     {
       'result' => 'ok',
-      'self_id' => session.mate_id,
+      'self_id' => session.name,
       'mates' => mates
     }.to_json
   end
 
-  get '/json/get' do
+  get '/json/:room/get' do
     event=nil
-    session=get_session(params[:session])
-    if(session)
-      event=session.get_event 
-    end
+    room=params[:room]
+    session_digest=params[:session]
+    session=get_session(room, session_digest )
+    @activity_tracker.active({:room => room,
+                               :session => session_digest})
+    event=session.get_event 
     return {'result' => 'timeout'}.to_json if !event
-    puts "sending to "+session.mate.name+" from "+event.author.name
     {
       'result' => 'ok',
       'event' => event
     }.to_json
   end
 
-  get '/json/message' do
-    session=get_session(params[:session])
+  get '/json/:room/message' do
+    room=params[:room]
+    session_digest=params[:session]
+    session=get_session(room, session_digest )
+    @activity_tracker.active({:room => room,
+                               :session => session_digest})
     message=params[:message]
     message=sanitize message
-    message_event=Message_event.new(session, message)
+    message_event=Message_event.new(session.name, message)
     session.active_room.post_event(message_event)
     {'result' => 'ok'}.to_json
   end
 
-  get '/json/typer' do
-    session=get_session(params[:session])
+  get '/json/:room/typer' do
+    session=get_session(params[:room], params[:session])
     message=params[:message]
     message=sanitize message
-    typer_event=Typer_event.new(session, message)
+    typer_event=Typer_event.new(session.name, message)
     session.active_room.post_event(typer_event)
     {'result' => 'ok'}.to_json
   end
   
 end
-  

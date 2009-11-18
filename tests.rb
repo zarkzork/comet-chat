@@ -27,5 +27,5 @@ if current_activity_tests_md5!=old_activity_test_md5||
   end
 end
 # this values are part of the test suite do not delete
-###activity_md5:5550d12539e4b3ce2f4baa89dde62433
-###activity_test_md5:2421d224912ca7b7471e101d27b2360c
+###activity_md5:b47d6c3ae3fbbf63564823041346b4c2
+###activity_test_md5:bdc238722d81db891e3796740843f1bf

@@ -1,9 +1,11 @@
 require 'monitor' 
 
+#Thread.abort_on_exception=true
+
 # activity tracker is a class used to generate events when mate is
 # not active for some time. Class recieve triggers when something is
 # active and after specific timeout chxoecks if someone idle long
-# enough. Accuracy is timeout/tresholds+timeout%tresholds.
+# enough. Accuracy is timeout/tresholds
 
 class Activity_tracker
   # number of tresholds that should pass before trigger will be active
@@ -17,20 +19,28 @@ class Activity_tracker
     @hash.extend(MonitorMixin)
     @cv=@hash.new_cond
     # default values
-    @tresholds=4
-    @timeout=8
+    @tresholds=10
+    @timeout=40
+  end
+
+  def tick_time
+    @timeout.to_f/@tresholds
   end
 
   # start waiting for event to be triggered
   def launch
     Thread.new do
-      i=0
+      start_time=nil
+      finish_time=nil
+      adjust=tick_time
       while !@hash.empty?
-        adjust= i%@tresholds==0?@timeout%@tresholds:0
-        i+=1
         @hash.synchronize do
+          start_time=Time.now
+          @cv.wait(adjust)
           checker
-          @cv.wait(@timeout/@tresholds+adjust)
+          finish_time=Time.now
+          adjust=2*tick_time-(finish_time-start_time).to_f
+          adjust=0 if adjust<0
         end
       end
     end
@@ -38,13 +48,13 @@ class Activity_tracker
 
   def active(id)
     # debug output
-    # puts Time.now.to_s+' key '+id.to_s+' now active'
+    puts Time.now.to_s+' key '+id.to_s+' now active'
     need_to_launch=false
     @hash.synchronize do
-      @hash[id]=0
-      if @hash.size==1
+      if @hash.size==0
         need_to_launch=true
       end
+      @hash[id]=1
     end
     if need_to_launch
       launch
@@ -57,7 +67,7 @@ class Activity_tracker
   def checker
     @hash.each_pair do |key, value|
       @hash[key]=value+1
-      # puts Time.now.to_s+" key "+key.to_s+" has value "+@hash[key].to_s
+      puts Time.now.to_s+" key "+key.to_s+" has value "+@hash[key].to_s
       if value>=@tresholds
         @hash.delete key
         @action.call key

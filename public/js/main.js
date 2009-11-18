@@ -1,10 +1,3 @@
-/* mate is object thar represents one of the room participants */
-function Mate(id, name){
-  this.id=id;
-  this.name=name;
-  return this;
-}
-
 /* message is representation of the event to be shown on the message board */
 /* from may be null, in such case message will be treated as error */
 /* types of message: typer, message, error */
@@ -27,7 +20,7 @@ Message.prototype={
       li.append(
 	$("<span/>")
 	  .addClass("from")
-	  .text(this.from.name)
+	  .text(this.from)
       );
     }
     li.append(
@@ -51,6 +44,8 @@ function Room(id, name){
   this.message_queue=[];
   /* true if request is being sent */
   this.request_processing=false;
+  /* number of errors already accured while processing message */
+  this.errors_occured=0;
   this.topic=new Topic("tst");
   this.messages=new Messages();
   this.mates=new Mates([]);
@@ -113,7 +108,6 @@ Room.prototype={
    typer event */
   postMessage: function(text, isFinal){
     var self=this;
-    console&&console.log(self);
     var type= isFinal?"message":"typer";
     this.message_queue
       .push({ /* this property is needed just for postMessage() */
@@ -121,12 +115,11 @@ Room.prototype={
 	      /* standart jquery ajax properties */
 	      type: "GET",
 	      cache: false,
-	      url: "/json/"+type,
+	      url: "/json/"+this.room_id+"/"+type,
 	      data: "session="+this.session+"&"+
 		"message="+text,
 	      dataType: "json",
 	      success: function(data){
-		console&&console.log("done");
 		if(data.result!='ok'){
 		  self.showError("Can't send the message.");
 		}
@@ -143,10 +136,10 @@ Room.prototype={
 	      error: function(XMLHttpRequest,
 			      textStatus,
 			      errorThrown){
-		console&&console.log("error");
+		console&&console.log("Can't send the message.");
 		self.showError("Can't send the message. ("+
 			       textStatus+")");
-		if(self.message_queue.length==0){
+			if(self.message_queue.length==0){
 		  self.request_processing=false;
 		}else{
 		  self.processQueue();
@@ -159,6 +152,7 @@ Room.prototype={
     if(!this.request_processing){
       this.request_processing=true;
       $.ajax(this.message_queue.shift());
+      processQueue();
     }else{
       /* here we now that last element is unprocessed and if it */
       /* "typer" event we can remove it with new one. */
@@ -173,7 +167,7 @@ Room.prototype={
     $.ajax({
 	     type: "GET",
 	     cache: false,
-	     url: "/json/mates",
+	     url: "/json/"+this.room_id+"/mates",
 	     data: "session="+this.session,
 	     dataType: "json",
 	     success: function(data){
@@ -182,10 +176,9 @@ Room.prototype={
 		 return;
 	       }
 	       for(var i in data.mates){
-		 self.mates.add(new Mate(data.mates[i].id,
-					 data.mates[i].name));
+		 self.mates.add(data.mates[i]);
 	       }
-	       self.self=self.mates.get(data.self_id);
+	       self.self=data.self_id;
 	       cb&&cb();
 	     },
 	     error: function(XMLHttpRequest, textStatus, errorThrown){
@@ -197,7 +190,7 @@ Room.prototype={
     var self=this;
     $.ajax({
 	     type: "GET",
-	     url: "/json/get",
+	     url: "/json/"+this.room_id+"/get",
 	     cache: false,
 	     data: "session="+this.session,
 	     dataType: "json",
@@ -210,7 +203,12 @@ Room.prototype={
 	       continueProcessing();
 	     },
 	     error: function(XMLHttpRequest, textStatus, errorThrown){
-	       continueProcessing();
+	       self.errors_occured++;
+	       if(self.errors_occured>5){
+		 self.showError('there was some error in getting'+
+				'events from server');
+	       }
+	       setTimeout(continueProcessing, self.errors_occured*2000);
 	     }
 	   });
     function continueProcessing(){
@@ -221,19 +219,20 @@ Room.prototype={
     var mate=null;
     switch(event.type){
     case "Message_event":
-      mate=this.mates.get(event.author);
+      mate=event.author;
       this.messages.add(new Message(mate, event.message, "message"));
       break;
     case "Typer_event":
-       mate=this.mates.get(event.author);
+       mate=event.author;
       this.messages.add(new Message(mate, event.message, "typer"));
       break;
     case "Mate_event":
       switch(event.status){
       case "enter":
-	var new_mate=new Mate(event.mate.id,
-			  event.mate.name);
-	this.mates.add(new_mate);
+	this.mates.add(event.mate);
+	break;
+      case "left":
+	this.mates.remove(event.mate);
 	break;
       default:
 	throw "unsoported Mate_event type.";
@@ -292,16 +291,10 @@ Mates.prototype={
     this.mates.push(mate);
     this.draw();
   },
-  get:function(id){
-    return $.grep(this.mates,
-	   function(n, i){
-	     return n.id==id;
-	   })[0];
-  },
-  remove: function(id){
+  remove: function(name){
     this.mates=$.grep(this.mates,
 		      function(n, i){
-			return n.id!=id;
+			return n!=name;
 		      });
     this.draw();
   },
@@ -312,7 +305,7 @@ Mates.prototype={
     }
   },
   _drawMate:function(mate){
-    this._obj.append( $("<li/>").text(mate.name) );
+    this._obj.append( $("<li/>").text(mate) );
   }
 };
 
@@ -325,12 +318,12 @@ Messages.prototype={
     var li=message.getLi();
     switch(message.type){
     case "message":
-      $("#"+"typer_"+message.from.id).remove();
+      $("#"+"typer_"+message.from).remove();
       $("#chat").append(li.attr("id", message.id));
       break;
     case "typer":
-      var old_typer=$("#"+"typer_"+message.from.id);
-      li.attr("id", "typer_"+message.from.id);
+      var old_typer=$("#"+"typer_"+message.from);
+      li.attr("id", "typer_"+message.from);
       if(old_typer.length!=0){
 	var prev=old_typer.prev();
 	old_typer.after(li);
@@ -364,7 +357,9 @@ function typer(id, cb){
       var value=$(id).attr("value");
       if(e.which==13){
       	if(value!=""){
-	  console&&console.log("kd");
+	  if(timeout!=-1){
+	    clearTimeout(timeout);
+	  }
 	  cb&&cb(value, true);
 	}
       }
@@ -372,19 +367,19 @@ function typer(id, cb){
   $(id).keyup(
     function(e){
       var value=$(id).attr("value");
-      if(timeout!=-1){
-	clearTimeout(timeout);
-      }
-      if(e.which!=13){
-	if(value.length%5==0){
-	  console&&console.log("up1");
-	  cb&&cb(value, false);
-	}else{
-	  timeout=setTimeout(
-	    function(){
-	      console&&console.log("up2");
-	      cb&&cb(value, false);
-	    }, 200);
+      if(value!=""){
+	if(timeout!=-1){
+	  clearTimeout(timeout);
+	}
+	if(e.which!=13){
+	  if(value.length%5==0){
+	    cb&&cb(value, false);
+	  }else{
+	    timeout=setTimeout(
+	      function(){
+		cb&&cb(value, false);
+	      }, 200);
+	  }
 	}
       }
     });
@@ -392,7 +387,6 @@ function typer(id, cb){
     function(){
       var value=$(id).attr("value");
       if(value!=""){
-	console&&console.log("sub");
 	cb&&cb(value, true);
       }
     });

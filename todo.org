@@ -1,5 +1,7 @@
 comet online zarkzork-based html5 webchat
 it's so techy please don't break it.
+* Thread safe
+* make logging asynchronous
 * interface
 ** home page
    ---
