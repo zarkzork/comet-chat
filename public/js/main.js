@@ -407,7 +407,7 @@ $(function(){
       function(){
 	$("#enter_section").hide();
 	$("#connecting").show();
-	new Room(document.location.hash.slice(1),
+	new Room(document.location.pathname.slice(1),
 		 $("#mate_name").attr("value"));
 	return false;
       });
