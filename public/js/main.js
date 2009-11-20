@@ -113,6 +113,44 @@ Room.prototype={
 	     async: false
 	   });
   },
+  topicChange: function(topic){
+    var self=this;
+    this.message_queue
+      .push({
+	      /* this property is needed just for processQueue() */
+	      typer: false,
+	      /* standart jquery ajax properties */
+	      type: "GET",
+	      cache: false,
+	      url: "/json/"+this.room_id+"/topic",
+	      data: "session="+this.session+"&"+
+		"message="+text,
+	      dataType: "json",
+	      success: function(data){
+		if(data.result!='ok'){
+		  self.showError("Can't change the topic.");
+		}
+		self.topic.change(text);
+		if(self.message_queue.length==0){
+		  self.request_processing=false;
+		}else{
+		  self.processQueue();
+		}
+	      },
+	      error: function(XMLHttpRequest,
+			      textStatus,
+			      errorThrown){
+		console&&console.log("Can't change topic.");
+		self.showError("Can't change topic. ("+
+			       textStatus+")");
+			if(self.message_queue.length==0){
+		  self.request_processing=false;
+		}else{
+		  self.processQueue();
+		}
+	      }
+	    });
+  },
   /* requests are processed one after another to not let the typer
    events come after real message, maybe there shoud be timeout for
    typer event */
@@ -120,8 +158,9 @@ Room.prototype={
     var self=this;
     var type= isFinal?"message":"typer";
     this.message_queue
-      .push({ /* this property is needed just for postMessage() */
-	      typer: true,
+      .push({
+	      /* this property is needed just for processQueue() */
+	      typer: isFinal,
 	      /* standart jquery ajax properties */
 	      type: "GET",
 	      cache: false,
@@ -235,6 +274,9 @@ Room.prototype={
     case "Typer_event":
        mate=event.author;
       this.messages.add(new Message(mate, event.message, "typer"));
+      break;
+    case "Topic_event":
+      this.topic.change(event.message);
       break;
     case "Mate_event":
       switch(event.status){
