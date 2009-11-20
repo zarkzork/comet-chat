@@ -1,14 +1,19 @@
 comet online zarkzork-based html5 webchat
-it's so techy please don't break it.
+it's so cool please don't break it.
+* TODO make front page
+* TODO json api Tests [14%]
+  - [X] simple message
+  - [ ] simple typer
+  - [ ] topic event
+  - [ ] room with 8 people and make shure that all get events
+  - [ ] simple dialog
+  - [ ] room enter event && get_mates
+  - [ ] room_leave event && get_mates
+* TODO javasctipt Tests  
+* TODO refactor rb
+* TODO refactor javascript
 * Thread safe
   add mutex on all operations that change class variables
-* make logging asynchronous
-* interface
-** home page
-   ---
-** chat
-*** TODO if room.getEvent() returns error
-    then check if it is timeout error then retry, else => error
 * texts
 ** title
    it's a online comet-based html5 zarkzork web-chat now with ***
@@ -17,13 +22,12 @@ it's so techy please don't break it.
   Events are objects that user client supposed to show to
   users. Each event has process method wich should store needed things
   to database.
-** On enter/leave event
-* add topic event
-* tests
-** TODO write tests for json api
-* zark-zork joke machine
+* features
+** zark-zork joke machine
   Let server create very rare messages something like.
   server: i'm so tired of reading logs. I'wish someone said that i'm
   so cool and nobody did. And if someone did, i could not tell nobody
   becouse they say i should keep your privasy. I't so hard beeing
   server.
+** leave room link
+** when leaving via timeout show last message
