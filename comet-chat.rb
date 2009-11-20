@@ -1,9 +1,7 @@
 # gems
 require 'rubygems'
-require 'dm-core'
 require 'sinatra'
 require 'json'
-require 'haml'
 require 'sanitize'
 # aplication stuff
 require 'comet'
@@ -15,19 +13,24 @@ class Comet_chat < Sinatra::Base
   set :public, './public'
 
   helpers do
-    def validate(string)
+    # helper method that ensures given string is matched regexp
+    # /^[a-zA-Z1-9]*$/. +name+ is optional name of paramers to be
+    # checked to produce error messages
+    def validate(string, name=:unknown_param)
       if (!string)||(!string =~ /^[a-zA-Z1-9]*$/)
-        throw :halt, [503, "wrong symbol in param"]
+        throw :halt, [503, "wrong symbol or"+
+                      " param missing: "+name.inspect]
       end
     end
 
+    # invoke Sanitize.clean()
     def sanitize(string)
       Sanitize.clean(string)
     end
 
     def get_session(room_digest, session_digest)
-      validate room_digest
-      validate session_digest
+      validate room_digest, :room_digest
+      validate session_digest, :session_digest
       result=@active_rooms[room_digest][session_digest]
       throw :halt, [503, { 'result' => 'error'}.to_json] if !result
       result
@@ -52,8 +55,8 @@ class Comet_chat < Sinatra::Base
   get '/json/:room/enter' do
     room=params[:room]
     name=params[:name]
-    validate room
-    validate name
+    validate room, :room
+    validate name, :name
     active_room=@active_rooms[room]
     if !active_room
       @active_rooms[room]=active_room=Active_room.new
@@ -94,6 +97,7 @@ class Comet_chat < Sinatra::Base
     }.to_json
   end
 
+  # Main "comet" method this is very long
   get '/json/:room/get' do
     event=nil
     room=params[:room]
@@ -109,12 +113,14 @@ class Comet_chat < Sinatra::Base
     }.to_json
   end
 
+  #
+  # message and topic event handling
+  #
+  
   get '/json/:room/message' do
     room=params[:room]
     session_digest=params[:session]
     session=get_session(room, session_digest )
-    @activity_tracker.active({:room => room,
-                               :session => session_digest})
     message=params[:message]
     message=sanitize message
     message_event=Message_event.new(session.name, message)
@@ -130,7 +136,17 @@ class Comet_chat < Sinatra::Base
     session.active_room.post_event(typer_event)
     {'result' => 'ok'}.to_json
   end
-  
+
+  get '/json/:room/topic' do
+    session=get_session(params[:room], params[:session])
+    message=params[:message]
+    message=sanitize message
+    topic_event=Topic_event.new(session.name, message)
+    session.active_room.post_event(topic_event)
+    {'result' => 'ok'}.to_json
+  end
+
+  # return room chat page
   get '/:room' do
     erb :chat
   end

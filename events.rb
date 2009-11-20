@@ -75,3 +75,9 @@ class Typer_event < Text_event
     super(name, message)
   end
 end
+
+class Topic_event < Text_event
+  def initialize(name, message)
+    super(name, message)
+  end
+end
