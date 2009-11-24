@@ -1,4 +1,4 @@
-# gems
+# general ruby
 require 'rubygems'
 require 'sinatra'
 require 'json'
@@ -31,9 +31,9 @@ class Comet_chat < Sinatra::Base
     def get_session(room_digest, session_digest)
       validate room_digest, :room_digest
       validate session_digest, :session_digest
-      result=@active_rooms[room_digest][session_digest]
-      throw :halt, [503, { 'result' => 'error'}.to_json] if !result
-      result
+      room=@active_rooms[room_digest]
+      throw :halt, [503, { 'result' => 'error'}.to_json] if !room
+      room[session_digest]
     end
   end
 
@@ -43,6 +43,7 @@ class Comet_chat < Sinatra::Base
       session=get_session(hash[:room], hash[:session])
       session.active_room.post_event Mate_event.new(session.name, :left)
       session.active_room.remove session.hexdigest
+      @active_room.remove hash[:room] if session.active_room.empty?
     end
   end
 
@@ -69,6 +70,7 @@ class Comet_chat < Sinatra::Base
     enter_event=Mate_event.new(name, :enter)
     session.active_room.post_event(enter_event)
     {
+      'topic' => active_room.topic,
       'session' => session.hexdigest,
       'result'  => 'ok'
     }.to_json
@@ -143,6 +145,7 @@ class Comet_chat < Sinatra::Base
     message=sanitize message
     topic_event=Topic_event.new(session.name, message)
     session.active_room.post_event(topic_event)
+    session.active_room.topic=message
     {'result' => 'ok'}.to_json
   end
 

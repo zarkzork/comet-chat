@@ -1,11 +1,30 @@
 require 'monitor'
+require 'thread'
 require 'digest/md5'
 
 class Active_room
-  def initialize
+
+  def initialize(topic="change me")
     @sessions=Hash.new
+    @topic=topic
+    @topic_mutex=Mutex.new
   end
 
+  def topic
+    @topic
+  end
+  
+  def topic=(topic)
+    @topic_mutex.synchronize do
+      @topic=topic
+    end
+    @topic
+  end
+
+  def empty?
+    @sessions.empty?
+  end
+  
   def enter(name)
     session=Active_session.new(self, name)
     @sessions[session.hexdigest]=session

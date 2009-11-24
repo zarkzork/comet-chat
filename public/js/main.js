@@ -38,38 +38,39 @@ function Room(id, name){
   this.room_id=id;
   /* that very man who is about to enter this room */
   this.self=null;
-  /* session keeps session id that is needed in every network operation */
-  this.session=null;
-  /* queue of messages to be send over network */
-  this.message_queue=[];
-  /* true if request is being sent */
-  this.request_processing=false;
-  /* number of errors already accured while processing message */
-  this.errors_occured=0;
-  this.topic=new Topic("tst");
+  /* topic object to control topic representation */
+  this.topic=new Topic("");
+  /* same for messages */
   this.messages=new Messages();
+  /* and mates */
   this.mates=new Mates([]);
+  this.network_controller=new NetworkController(this);
   this.makeInputBox(function(value, isFinal){
-		      self.postMessage(value, isFinal);
+		      var nc=self.network_controller;
+		      nc.postMessage(value, isFinal);
 		      if(isFinal){
 			self.clearInputBox();
 		      }
 		    });
   this.topic.onChange=
     function(value, isFinal){
-      console&&console.log(value+":"+isFinal);
+      var nc=self.network_controller;
+      nc.topicChange(value);
     };
-  $(window).unload(function(){self.leave();});
-  this.enter(name,
+  $(window).unload(function(){
+  		     self.network_controller.leave();
+  		   });
+  /* enter the room and get its mates */
+  this.network_controller.enter(name,
 	     function(){
-	       self.getMates(
+	       self.network_controller.getMates(
 		 function(){
 		   $("#connecting").hide();
 		   $("#chat_section").show();
 		   $("#input_line").focus();	
-		   self.startProcessing(
+		   self.network_controller.startProcessing(
 		     function(event){
-		       self.process(event);
+		       self.network_controller.process(event);
 		     }
 		   );
 		 }
@@ -82,135 +83,90 @@ Room.prototype={
     var height=$("#chat_section .chat_list *").height();
     $("#chat_section .chat_list").get(0).scrollTop=height;
   },
-  /* enters to room and gets session id */
-  enter: function(name, cb){
-    var self=this;
-    $.ajax({
-	     type: "GET",
-	     cache: false,
-	     url: "/json/"+this.room_id+"/enter",
-	     data: "name="+name,
-	     dataType: "json",
-	     success: function(data){
-	       if(data.result!='ok'){
-		 self.showError("Can't enter the room.");
-		 return;
-	       }
-	       self.session=data.session;
-	       cb&&cb();
-	     },
-	     error: function(XMLHttpRequest, textStatus, errorThrown){
-	       self.showError("Can't enter the room. ("+textStatus+")");
-	     }
-	   });
+  showError: function(text){
+    var message=
+      new Message(null, text, "error");
+    this.messages.add(message);
   },
-  leave: function(){
-    $.ajax({
-	     type: "GET",
-	     cache: false,
-	     url: "/json/"+this.room_id+"/leave",
-	     data: "session="+this.session,
-	     async: false
-	   });
+  clearInputBox: function(){
+    $("#input_line").attr("value","");
   },
-  topicChange: function(topic){
-    var self=this;
-    this.message_queue
-      .push({
-	      /* this property is needed just for processQueue() */
-	      typer: false,
-	      /* standart jquery ajax properties */
-	      type: "GET",
-	      cache: false,
-	      url: "/json/"+this.room_id+"/topic",
-	      data: "session="+this.session+"&"+
-		"message="+text,
-	      dataType: "json",
-	      success: function(data){
-		if(data.result!='ok'){
-		  self.showError("Can't change the topic.");
+  makeInputBox: function(cb){
+    typer("#input_line", cb);
+    $("#send_button").click(
+      function(){
+	cb($("#input_line").attr("value"), true);
+      });
+    return this;
+  }  
+};
+
+function testNetworkController(){
+  var messages_posted=0;
+  function getRoomName(){
+    return "room"+Math.floor(Math.random()*1000);
+  }
+  function createTestRoom(){
+    return {
+      room_id:getRoomName(),
+      mates:new Mates([]),
+      messages:{add:
+		function(){
+		  messages_posted++;
+		  console.log("message");
 		}
-		self.topic.change(text);
-		if(self.message_queue.length==0){
-		  self.request_processing=false;
-		}else{
-		  self.processQueue();
-		}
-	      },
-	      error: function(XMLHttpRequest,
-			      textStatus,
-			      errorThrown){
-		console&&console.log("Can't change topic.");
-		self.showError("Can't change topic. ("+
-			       textStatus+")");
-			if(self.message_queue.length==0){
-		  self.request_processing=false;
-		}else{
-		  self.processQueue();
-		}
-	      }
-	    });
-  },
-  /* requests are processed one after another to not let the typer
-   events come after real message, maybe there shoud be timeout for
-   typer event */
-  postMessage: function(text, isFinal){
-    var self=this;
-    var type= isFinal?"message":"typer";
-    this.message_queue
-      .push({
-	      /* this property is needed just for processQueue() */
-	      typer: isFinal,
-	      /* standart jquery ajax properties */
-	      type: "GET",
-	      cache: false,
-	      url: "/json/"+this.room_id+"/"+type,
-	      data: "session="+this.session+"&"+
-		"message="+text,
-	      dataType: "json",
-	      success: function(data){
-		if(data.result!='ok'){
-		  self.showError("Can't send the message.");
-		}
-		self.messages.add(new Message(self.self,
-					      text,
-					      type));
-		self.scrollDownChat();
-		if(self.message_queue.length==0){
-		  self.request_processing=false;
-		}else{
-		  self.processQueue();
-		}
-	      },
-	      error: function(XMLHttpRequest,
-			      textStatus,
-			      errorThrown){
-		console&&console.log("Can't send the message.");
-		self.showError("Can't send the message. ("+
-			       textStatus+")");
-			if(self.message_queue.length==0){
-		  self.request_processing=false;
-		}else{
-		  self.processQueue();
-		}
-	      }
-	    });
-    this.processQueue();    
-  },
-  processQueue: function(){
-    if(!this.request_processing){
-      this.request_processing=true;
-      $.ajax(this.message_queue.shift());
-      processQueue();
-    }else{
-      /* here we now that last element is unprocessed and if it */
-      /* "typer" event we can remove it with new one. */
-      if(this.message_queue.length>0 &&
-	 this.message_queue[this.message_queue.length-1].typer){
-	this.message_queue.pop();
-      }
+	       },
+      topic:{change:function(){;}},
+      scrollDownChat: function(){;}
+    };
+  }
+  function assert(statement, message){
+    if(!statement){
+      var err="assert failed "+(message||"");
+      console.error(err);
+      throw err;
     }
-  },
+  }
+  console.log("testing default use case");
+  var nc=new NetworkController(createTestRoom());
+  assert(nc.session==null);
+  nc.enter("vasya",
+	   function(){
+	     assert(nc.session!=null);
+	     console.log("logged in");
+	     nc.startProcessing();
+	     console.log("started processing");
+	     nc.getMates(
+	       function(){
+		 assert(nc.room.mates.mates.length==1);
+		 assert(nc.room.self=="vasya");
+		 console.log("loaded mates");
+		 nc.postMessage("tst",true);
+		 nc.postMessage("tst2",true);
+		 console.log("posted two messages");
+		 setTimeout(function(){
+			     assert(messages_posted==2);			     
+			   }, 2000);
+	       });
+	   });
+}
+
+function NetworkController(room){
+  this.room=room;
+  this.room_id=room.room_id;
+  /* session keeps session id that is needed in every network operation */
+  this.session=null;
+  /* queue of messages to be send over network */
+  this.message_queue=[];
+  /* true if request is being sent */
+  this.request_processing=false;
+  /* number of errors already accured while processing message */
+  this.errors_occured=0;
+  return this;
+}
+
+NetworkController.prototype={
+
   getMates: function(cb){
     var self=this;
     $.ajax({
@@ -221,20 +177,21 @@ Room.prototype={
 	     dataType: "json",
 	     success: function(data){
 	       if(data.result!='ok'){
-		 self.showError("Can't load room mates.");
+		 self.room.showError("Can't load room mates.");
 		 return;
 	       }
 	       for(var i in data.mates){
-		 self.mates.add(data.mates[i]);
+		 self.room.mates.add(data.mates[i]);
 	       }
-	       self.self=data.self_id;
+	       self.room.self=data.self_id;
 	       cb&&cb();
 	     },
 	     error: function(XMLHttpRequest, textStatus, errorThrown){
-	       self.showError("Can't load room mates. ("+textStatus+")");
+	       self.room.showError("Can't load room mates. ("+textStatus+")");
 	     }
 	   });
   },
+
   startProcessing: function(cb){
     var self=this;
     $.ajax({
@@ -264,27 +221,28 @@ Room.prototype={
       self.startProcessing(cb);
     }
   },
+
   process: function(event){
     var mate=null;
     switch(event.type){
     case "Message_event":
       mate=event.author;
-      this.messages.add(new Message(mate, event.message, "message"));
+      this.room.messages.add(new Message(mate, event.message, "message"));
       break;
     case "Typer_event":
        mate=event.author;
-      this.messages.add(new Message(mate, event.message, "typer"));
+      this.room.messages.add(new Message(mate, event.message, "typer"));
       break;
     case "Topic_event":
-      this.topic.change(event.message);
+      this.room.topic.change(event.message);
       break;
     case "Mate_event":
       switch(event.status){
       case "enter":
-	this.mates.add(event.mate);
+	this.room.mates.add(event.mate);
 	break;
       case "left":
-	this.mates.remove(event.mate);
+	this.room.mates.remove(event.mate);
 	break;
       default:
 	throw "unsoported Mate_event type.";
@@ -293,24 +251,117 @@ Room.prototype={
     default:
       throw "unsoported Event type.";
     }
-    this.scrollDownChat();
+    this.room.scrollDownChat();
   },
-  showError: function(text){
-    var message=
-      new Message(null, text, "error");
-    this.messages.add(message);
+
+  /* enters to room and gets session id */
+  enter: function(name, cb){
+    var self=this;
+    $.ajax({
+	     type: "GET",
+	     cache: false,
+	     url: "/json/"+this.room_id+"/enter",
+	     data: "name="+name,
+	     dataType: "json",
+	     success: function(data){
+	       if(data.result!='ok'){
+		 self.showError("Can't enter the room.");
+		 return;
+	       }
+	       self.session=data.session;
+	       self.room.topic.change(data.topic);
+	       cb&&cb();
+	     },
+	     error: function(XMLHttpRequest, textStatus, errorThrown){
+	       self.showError("Can't enter the room. ("+textStatus+")");
+	     }
+	   });
   },
-  clearInputBox: function(){
-    $("#input_line").attr("value","");
+
+  leave: function(){
+    $.ajax({
+	     type: "GET",
+	     cache: false,
+	     url: "/json/"+this.room_id+"/leave",
+	     data: "session="+this.session,
+	     async: false
+	   });
   },
-  makeInputBox: function(cb){
-    typer("#input_line", cb);
-    $("#send_button").click(
-      function(){
-	cb($("#input_line").attr("value"), true);
-      });
-    return this;
-  }  
+
+
+  /* private function to generate request objects for jquery ajax requests for message, typer, and topic change */  
+  _createAJAXMessage: function(type, text){
+    var self=this;
+    return {
+      /* this property is needed just for processQueue() */
+      typer: type=="typer",
+      /* standart jquery ajax properties */
+      type: "GET",
+      cache: false,
+      url: "/json/"+this.room_id+"/"+type,
+      data: "session="+this.session+"&"+
+	"message="+text,
+      dataType: "json",
+      success: function(data){
+	if(data.result!='ok'){
+	  self.showError("Can't send the message.");
+	}
+	switch(type){
+	case "message":
+	case "typer":
+	  self.room.messages.add(new Message(self.room.self,
+					     text,
+					     type));
+	  self.room.scrollDownChat();
+	  break;
+	case "topic":
+	  break;
+	default:
+	  console&&console.error("unsopported type");
+	  throw "unsopported type";
+	}
+	self.request_processing=false;
+	self.processQueue();
+      },
+      error: function(XMLHttpRequest,
+		      textStatus,
+		      errorThrown){
+	console&&console.log("Can't send the message.");
+	self.showError("Can't send the message. ("+
+		       textStatus+")");
+	self.request_processing=false;
+	self.processQueue();
+      }
+    };
+  },
+  
+  topicChange: function(topic){
+    var self=this;
+    this.message_queue
+      .push(
+	this._createAJAXMessage("topic", topic)
+	    );
+    this.processQueue();
+  },
+
+  /* requests are processed one after another to not let the typer
+   events come after real message, maybe there shoud be timeout for
+   typer event */
+  postMessage: function(text, isFinal){
+    var self=this;
+    var type= isFinal?"message":"typer";
+    this.message_queue
+      .push(this._createAJAXMessage(type, text));
+    this.processQueue();    
+  },
+  
+  processQueue: function(){
+    if((!this.request_processing)&&this.message_queue.length!=0){
+      this.request_processing=true;
+      $.ajax(this.message_queue.shift());
+    }
+  }
+  
 };
 
 function Topic(text){
