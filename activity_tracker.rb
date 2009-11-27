@@ -53,7 +53,7 @@ class Activity_tracker
 
   def active(id)
     # debug output
-    puts Time.now.to_s+' key '+id.to_s+' now active'
+    # puts Time.now.to_s+' key '+id.to_s+' now active'
     need_to_launch=false
     @hash.synchronize do
       if @hash.size==0
@@ -72,7 +72,7 @@ class Activity_tracker
   def checker
     @hash.each_pair do |key, value|
       @hash[key]=value+1
-      puts Time.now.to_s+" key "+key.to_s+" has value "+@hash[key].to_s
+      # puts Time.now.to_s+" key "+key.to_s+" has value "+@hash[key].to_s
       if value>=@tresholds
         @hash.delete key
         @action.call key

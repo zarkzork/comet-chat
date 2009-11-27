@@ -93,10 +93,11 @@ Room.prototype={
   },
   makeInputBox: function(cb){
     typer("#input_line", cb);
-    $("#send_button").click(
-      function(){
-	cb($("#input_line").attr("value"), true);
-      });
+    /* when user clicks the button, onedit event is already envoked */
+    // $("#send_button").click(
+    //   function(){
+    // 	cb($("#input_line").attr("value"), true);
+    //   });
     return this;
   }  
 };

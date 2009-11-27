@@ -1,0 +1,151 @@
+/* html5 stuff */
+section, article, aside, header, footer, nav, dialog, figure { display:block; }
+
+#chat_section{
+    display: none;
+}
+
+#enter_section{
+    position: absolute;
+    left:0px;
+    right:0px;
+    top:0px;
+    bottom:0px;
+    background-color: #666;
+    color: #fff;
+}
+
+#enter_section form{
+    position: absolute;
+    top: 35%;
+    width: 30%;
+    left: 35%;
+    background-color: #333;
+    padding: 20px;
+    -moz-border-radius: 10px;
+}
+
+#chat_section{
+}
+
+#chat_section .chat_list{
+    padding-top:10px;
+    padding-bottom: 20px;
+    top: 90px;
+    bottom: 40px;
+    position: absolute;
+    overflow-y: auto;
+    left: 0px;
+    right: 0px;
+}
+
+#chat{
+}
+
+.opaque{
+    display: inline;
+    color: inherit;
+    background: none;
+    font: inherit;
+    border: none;
+    text-align: inherit;
+    padding: 0;
+    margin: 0;
+    line-height: inherit;
+    vertical-align: inherit;
+    
+}
+
+/* header style */
+#topic_helper{
+    font-size: 75%;
+    color: #666;
+}
+
+#chat_section header{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    background-color: #333;
+    color: #fff;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    text-align: center;
+    height: 80px;
+}
+
+#topic{
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* mates section */
+#mates ul{
+    padding-bottom: 15px;
+}
+
+#mates ul li{
+    font-size: 75%;
+    display: inline;
+    margin-right: 5px;
+    margin-left: 5px;
+    background-color: #666;
+    padding: 3px;
+    -moz-border-radius: 4px;
+}
+
+/* message style */
+.message{
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.message .from{
+    color: #666;
+    margin-right: 5px;
+}
+
+.message .from:after{
+    content: ":";
+}
+
+#typers .message{
+    color: #aaa;
+}
+
+#errors{
+    text-align: center;
+    color: #f00;
+    font-size: 125%;
+}
+/* input style */
+input{
+    background: inherit;
+    color: inherit;
+    border: 1px solid #fff;
+    -moz-border-radius: 4px;
+}
+
+
+#input_box{
+    height: 20px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    overflow: hidden;
+}
+
+#input_line{
+    width: 80%;
+    padding-left: 5px;
+}
+
+#send_button{
+    width: 5%;
+}

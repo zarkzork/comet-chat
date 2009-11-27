@@ -48,9 +48,7 @@ class Comet_chat < Sinatra::Base
   end
 
   get '/' do
-    result="Rooms:"
-    @active_rooms.each{|r| result+=r.inspect+"\n"}
-    result
+    erb :index
   end
   
   get '/json/:room/enter' do

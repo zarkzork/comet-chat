@@ -12,33 +12,43 @@ end
 class JSON_test < Test::Unit::TestCase
   include Rack::Test::Methods
 
-  ROOM_NAME="fdsfa"
-
   def initialize(*args)
     super(*args)
   end
 
+  def setup
+    @room_name="fdsfa"
+  end
+  
   def app
     Comet_chat.new
   end
   
   def enter_the_room(name)
-    get "json/"+ROOM_NAME+"/enter", {:name =>name}
+    get "json/"+@room_name+"/enter", {:name =>name}
     assert last_response.ok?
     JSON(last_response.body)["session"]
   end
 
   def get_event(session)
-    get 'json/'+ROOM_NAME+"/get", { :session => session }
+    get 'json/'+@room_name+"/get", { :session => session }
     assert last_response.ok?
     result=JSON last_response.body
     assert result["result"]=="ok"
     result["event"]
   end
+
+  def get_mates(session)
+    get 'json/'+@room_name+'/mates', { :session => session}
+    assert last_response.ok?
+    result=JSON last_response.body
+    assert result["result"]=="ok", last_response.body.to_s
+    result["mates"]
+  end
   
   # test that test fails with no name given
   def test_no_name
-    get "json/"+ROOM_NAME+"/enter"
+    get "json/"+@room_name+"/enter"
     assert last_response.status==503
   end
 
@@ -54,7 +64,7 @@ class JSON_test < Test::Unit::TestCase
 
   def test_timeout
     session=enter_the_room("test_timeout")
-    get "json/"+ROOM_NAME+"/get", {:session => session}
+    get "json/"+@room_name+"/get", {:session => session}
     assert JSON(last_response.body)=={"result"=>"timeout"}
   end
 
@@ -68,9 +78,33 @@ class JSON_test < Test::Unit::TestCase
       assert result["message"]=="tst", "wrong message"
     end
     sleep 0.1
-    get 'json/'+ROOM_NAME+'/message', {:session => session1,
+    get 'json/'+@room_name+'/message', {:session => session1,
       :message=>"tst"}
     t.join
+  end
+
+  def test_mates
+    @room_name="zz"
+    enter_the_room "aa"
+    session=enter_the_room "aad"
+    result=get_mates session
+    assert result==["aa","aad"]||result==["aad","aa"]
+  end
+
+  def test_twice_fail
+    enter_the_room "zark"
+    get "json/"+@room_name+"/enter", {:name =>"zark"}
+    assert last_response.ok?
+    assert JSON(last_response.body)["result"]=="duplicate"
+  end
+
+  #check that if there is two rooms /mates return different users
+  def test_two_rooms_different_mates
+    enter_the_room "zark"
+    @room_name="anotherroom"
+    session=enter_the_room "zork"
+    result=get_mates session
+    assert result==["zork"]
   end
   
 end
