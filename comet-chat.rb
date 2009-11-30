@@ -43,7 +43,7 @@ class Comet_chat < Sinatra::Base
       session=get_session(hash[:room], hash[:session])
       session.active_room.post_event Mate_event.new(session.name, :left)
       session.active_room.remove session.hexdigest
-      @active_room.remove hash[:room] if session.active_room.empty?
+      @active_rooms.delete hash[:room] if session.active_room.empty?
     end
   end
 
