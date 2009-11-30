@@ -26,13 +26,18 @@ class JSON_test < Test::Unit::TestCase
   
   def enter_the_room(name)
     get "json/"+@room_name+"/enter", {:name =>name}
-    assert last_response.ok?
+    assert last_response.ok?, "response was:"+last_response.body
     JSON(last_response.body)["session"]
   end
 
+  def test_name_validation
+    get "json/@@@/enter", {:name => "test"}
+    assert last_response.status==503
+  end
+  
   def get_event(session)
     get 'json/'+@room_name+"/get", { :session => session }
-    assert last_response.ok?
+    assert last_response.ok?, "response was:"+last_response.body
     result=JSON last_response.body
     assert result["result"]=="ok"
     result["event"]
@@ -40,7 +45,7 @@ class JSON_test < Test::Unit::TestCase
 
   def get_mates(session)
     get 'json/'+@room_name+'/mates', { :session => session}
-    assert last_response.ok?
+    assert last_response.ok?, "response was:"+last_response.body
     result=JSON last_response.body
     assert result["result"]=="ok", last_response.body.to_s
     result["mates"]
@@ -94,7 +99,7 @@ class JSON_test < Test::Unit::TestCase
   def test_twice_fail
     enter_the_room "zark"
     get "json/"+@room_name+"/enter", {:name =>"zark"}
-    assert last_response.ok?
+    assert last_response.ok?, "response was:"+last_response.body
     assert JSON(last_response.body)["result"]=="duplicate"
   end
 
@@ -106,5 +111,5 @@ class JSON_test < Test::Unit::TestCase
     result=get_mates session
     assert result==["zork"]
   end
-  
+
 end

@@ -13,18 +13,21 @@ class Comet_chat < Sinatra::Base
   set :public, './public'
 
   helpers do
+
     # helper method that ensures given string is matched regexp
     # /^[a-zA-Z1-9]*$/. +name+ is optional name of paramers to be
     # checked to produce error messages
-    def validate(string, name=:unknown_param)
-      if (!string)||(!string =~ /^[a-zA-Z1-9]*$/)
-        throw :halt, [503, "wrong symbol or"+
-                      " param missing: "+name.inspect]
+    def validate(string, name=:unknown_param, custom_message=nil)
+      if string !~ /^[a-zA-Z0-9_]+$/
+        message=custom_message||"wrong symbol or"+
+          " param missing: "+name.inspect
+        throw :halt, [503, message]
       end
     end
 
     # invoke Sanitize.clean()
     def sanitize(string)
+      throw :halt, [503, {'result' => 'error'}.to_json] if !string
       Sanitize.clean(string)
     end
 
@@ -32,7 +35,7 @@ class Comet_chat < Sinatra::Base
       validate room_digest, :room_digest
       validate session_digest, :session_digest
       room=@active_rooms[room_digest]
-      throw :halt, [503, { 'result' => 'error'}.to_json] if !room
+      throw :halt, [503, {'result' => 'error'}.to_json] if !room
       room[session_digest]
     end
   end
@@ -55,12 +58,12 @@ class Comet_chat < Sinatra::Base
     room=params[:room]
     name=params[:name]
     validate room, :room
-    validate name, :name
+    name=sanitize name
     active_room=@active_rooms[room]
     if !active_room
       @active_rooms[room]=active_room=Active_room.new
     else
-      if active_room.contains_name? name
+      if active_room.contains_name?(name)
         return {'result' => 'duplicate'}.to_json
       end
     end
@@ -149,6 +152,7 @@ class Comet_chat < Sinatra::Base
 
   # return room chat page
   get '/:room' do
+    validate params[:room], :room, "wrong symbol in room name."
     erb :chat
   end
 end
