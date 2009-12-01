@@ -120,6 +120,12 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
     color: #f00;
     font-size: 125%;
 }
+
+#messages{
+    text-align: center;
+    font-size: 125%;
+}
+
 /* input style */
 input{
     background: inherit;

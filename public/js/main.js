@@ -57,6 +57,13 @@ function Room(id, name){
       var nc=self.network_controller;
       nc.topicChange(value);
     };
+  this.mates.whenAlone(function(isAlone){
+			 if(isAlone){
+			   self.showHelp();
+			 }else{
+			   self.hideHelp();
+			 }
+		     });
   $(window).unload(function(){
   		     self.network_controller.leave();
   		   });
@@ -87,6 +94,12 @@ Room.prototype={
     var message=
       new Message(null, text, "error");
     this.messages.add(message);
+  },
+  showHelp: function(){
+    $("#help").show();
+  },
+  hideHelp: function(){
+    $("#help").hide();
   },
   clearInputBox: function(){
     $("#input_line").attr("value","");
@@ -391,9 +404,20 @@ function Mates(mates){
 }
 
 Mates.prototype={
+  whenAlone: function(cb){
+    this._onAlone=cb;
+  },
   add: function(mate){
     this.mates.push(mate);
     this.draw();
+    if(this._onAlone!==undefined){
+      if(this.mates.length==1){
+	this._onAlone(true);
+      }else{
+	this._onAlone(false);
+      }
+    }
+    
   },
   remove: function(name){
     this.mates=$.grep(this.mates,
