@@ -6,6 +6,17 @@
     <link rel="stylesheet" href="css/reset.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="css/960.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="css/main.css" type="text/css" media="screen" />
+    <script type="text/javascript">
+      function createRoom(){
+      var path="";
+      var symbols="abcdefghijklmnopqrtsuvwxyz_01234567890";
+      for(var i=0;i<8;i++){
+      var index=Math.floor(Math.random()*symbols.length);
+      path+=symbols.charAt(index);
+      }
+      location.pathname='/'+path;
+      }
+    </script>
     <!--[if IE]>
     <script>
       /* create for ie html5 elements. */
@@ -31,34 +42,79 @@
 	</ul>
       </h1>
       <aside class="grid_6 omega">
-	<header>
-	  <canvas id="logo" height="65" width="250">
-	    <img src="img/comet.jpg" id="logo" alt="comet" />
-	  </canvas>
-	</header>
 	<article>
-	  Easiest way to create chat room. Push the button and create
-	  your room in 0.345 second average. Then give link to
-	  everybody is you need in chat and enjoy talking. Chat uses
-	  comet technology to enable live typing, so you do not need
-	  to wait while somebody types message. You can see it as
-	  person type. No registation. Just presh button and share link.
+	  <header>
+	    <canvas id="logo" height="65" width="250">
+	      <img src="img/comet.jpg" id="logo" alt="comet" />
+	    </canvas>
+	  </header>
+	  <p class="description">
+	    Easiest way to create chat room. Push the button and create
+	    your room in 0.345 second average. Then give link to
+	    everybody is you need in chat and enjoy talking. Chat uses
+	    comet technology to enable live typing, so you do not need
+	    to wait while somebody types message. You can see it as
+	    person type. No registration. Just press button and share
+	    link.
+	  </p>
 	</article>
 	<section id="create_room">
-	  <input type="button" value="create room" />
+	  <input
+	     type="button"
+	     value="create room"
+	     onclick="createRoom();"
+	  />
 	</section>
       </aside>
     </header>
+    <section id="feature_descriptions" class="grid_12">
+      <article class="grid_3 alpha">
+	<div class="feature f1">
+	  <h2>Livetype</h2>
+	  Your mates in chat room see text as you type. You don`t need
+	  to wait to know what they are going to say.
+	</div>
+      </article>
+      <article class="grid_3">
+	<div class="feature f2">
+	  <h2>Comet</h2>
+	  Comet brings you real speed. Messages are delivered
+	  instantly. They are really fast
+	</div>
+      </article>
+      <article class="grid_3">
+	<div class="feature f3">
+	  <h2>Simple</h2>
+	  There is no history, rooms are created when
+	  you enter them and deleted when you leave. Just chat room
+	  with clean and simple interface when you need it.
+	</div>
+      </article>
+      <article class="grid_3 omega">
+	<div class="feature f4">
+	  <h2>Open source</h2>
+	  All <a href="###">source code</a> is here for you. Grab it modify it. Use
+	  it. 
+	</div>
+      </article>
+    </section>
     <section id="review" class="grid_12">
-	<cite>it's truly amazing web service.</cite>
+	<cite>&#8220;it's truly amazing web service.&#8221;</cite>
 	<div class="author">&mdash;zarkzork (service author)</div>
     </section>
-    <section id="features">
-      live typing
-      free
-      no registration
-    </section>
-    <footer>
+    <footer class="grid_12">
+      <section class="grid_6 alpha">
+	To contact me write me email to:
+	<a href="mailto:zarkzork@gmail.com">zarkzork@gmail.com</a>
+      </section>
+      <section class="grid_6 omega">
+	links you might be interested:
+	<ol>
+	  <li>Read <a href="###">blog post</a> about this chat.</li>
+	  <li><a href="###">source code</a></li>
+	  <li><a href="###">submit</a> a bug</li>
+	</ol>
+      </section>
     </footer>
     <script type="text/javascript" src="js/logo.js"></script>
   </body>

@@ -36,6 +36,8 @@ it's so cool please don't break it.
   so cool and nobody did. And if someone did, i could not tell nobody
   becouse they say i should keep your privasy. I't so hard beeing
   server.
+** when name duplicates show error.
 ** leave room link
 ** when leaving via timeout show last message
 ** blinking missed messages flag in the title
+   

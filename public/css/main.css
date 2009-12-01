@@ -11,19 +11,25 @@ input{
     -moz-border-radius: 4px;
 }
 
-html{
+a{
+    color:inherit;
+    font-weight: bold;
+}
 
+ol{
+    list-style: circle inside;
+    margin-left: 20px;
 }
 
 body{
-    background: #666 url('../img/back.png') no-repeat 560px -200px;
+    background: #666 url('../img/back.png') no-repeat 560px -100px;
     color: #fff;
     font: 16px/1.2 Verdana,'Trebuchet MS',Arial,sans-serif;
 }
 
 .main_header{
-    margin-top: 50px;
-    margin-bottom: 50px;
+    margin-top: 120px;
+    margin-bottom: 60px;
 }
 
 h1{
@@ -39,10 +45,22 @@ h2, .author, #create_room{
     font-family: Georgia,serif;
 }
 
-article{
+.description{
     background-color: #333;
     padding: 20px;
     -moz-border-radius: 10px;
+}
+
+.feature{
+    margin-top: 20px;
+}
+
+.feature h2{
+    margin-bottom: 10px;
+}
+
+#feature_descriptions{
+    margin-top: 120px;
 }
 
 cite{
@@ -54,7 +72,7 @@ cite{
 
 /* little text box with reviews */
 #review{
-    margin-top: 50px;
+    margin-top: 120px;
     text-align: center;
 }
 
@@ -71,3 +89,7 @@ aside header{
     text-align: center;
 }
 
+footer{
+    margin-top:180px;
+    margin-bottom: 60px;
+}
