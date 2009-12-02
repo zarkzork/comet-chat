@@ -87,7 +87,7 @@ function Room(id, name){
 
 Room.prototype={
   scrollDownChat: function(){
-    var height=$("#chat_section .chat_list *").height();
+    var height=$("#chat_section .chat_list").height();
     $("#chat_section .chat_list").get(0).scrollTop=height;
   },
   showError: function(text){
