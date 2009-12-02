@@ -40,4 +40,3 @@ it's so cool please don't break it.
 ** leave room link
 ** when leaving via timeout show last message
 ** blinking missed messages flag in the title
-   
