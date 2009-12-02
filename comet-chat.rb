@@ -36,7 +36,9 @@ class Comet_chat < Sinatra::Base
       validate session_digest, :session_digest
       room=@active_rooms[room_digest]
       throw :halt, [503, {'result' => 'error'}.to_json] if !room
-      room[session_digest]
+      result=room[session_digest]
+      throw :halt, [503, {'result' => 'error'}.to_json] if !result
+      result
     end
   end
 
@@ -88,9 +90,6 @@ class Comet_chat < Sinatra::Base
   get '/json/:room/mates' do
     room=params[:room]
     session=get_session(room, params[:session])
-    return {
-      'result' => 'error'
-    }.json if !session
     room=session.active_room
     mates=room.names    
     {
@@ -100,7 +99,7 @@ class Comet_chat < Sinatra::Base
     }.to_json
   end
 
-  # Main "comet" method this is very long
+  # Main "comet" method this is very long request
   get '/json/:room/get' do
     event=nil
     room=params[:room]
