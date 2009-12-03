@@ -10,7 +10,6 @@ require 'activity_tracker'
 
 class Comet_chat < Sinatra::Base
   enable :static
-  set :public, './public'
 
   helpers do
 
