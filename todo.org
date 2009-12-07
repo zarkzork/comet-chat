@@ -1,11 +1,5 @@
 comet online zarkzork-based html5 webchat
 it's so cool please don't break it.
-* DONE refactor javascript
-  CLOSED: [2009-11-24 Tue 11:16]
-  make a function NetworkController() wich shoulf incapsulate all
-  network stuff. (this shuld make testing easy).  and try to make
-  Room() as small as possible.
-* TODO make front page
 * json api Tests [14%]
   CLOSED: [2009-11-24 Tue 11:17]
   - [X] simple message
@@ -15,20 +9,6 @@ it's so cool please don't break it.
   - [ ] simple dialog
   - [ ] room enter event && get_mates
   - [ ] room_leave event && get_mates
-* DONE javasctipt Tests [100%]
-  CLOSED: [2009-11-24 Tue 11:17]
-  - [X] test for NetworkController
-* TODO refactor rb
-* Thread safe
-  add mutex on all operations that change class variables
-* texts
-** title
-   it's a online comet-based html5 zarkzork web-chat now with ***
-** home page text
-* Events
-  Events are objects that user client supposed to show to
-  users. Each event has process method wich should store needed things
-  to database.
 * features
 ** zark-zork joke machine
   Let server create very rare messages something like.
@@ -37,6 +17,8 @@ it's so cool please don't break it.
   becouse they say i should keep your privasy. I't so hard beeing
   server.
 ** when name duplicates show error.
+** add mutex on all operations that change class variables
 ** leave room link
 ** when leaving via timeout show last message
-** blinking missed messages flag in the title
+** -1- missed messages flag in the title
+   use window.onblur and window.onfocus
