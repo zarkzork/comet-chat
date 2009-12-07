@@ -4,7 +4,7 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
 
 /* input style */
 input{
-    background: inherit;
+    background-color: transparent;
     color: inherit;
     font: inherit;
     border: 1px solid #fff;
