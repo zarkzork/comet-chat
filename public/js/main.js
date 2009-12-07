@@ -227,7 +227,7 @@ NetworkController.prototype={
 	     error: function(XMLHttpRequest, textStatus, errorThrown){
 	       self.errors_occured++;
 	       if(self.errors_occured>5){
-		 self.showError('there was some error in getting'+
+		 self.room.showError('there was some error in getting'+
 				'events from server');
 	       }
 	       setTimeout(continueProcessing, self.errors_occured*2000);
@@ -281,7 +281,7 @@ NetworkController.prototype={
 	     dataType: "json",
 	     success: function(data){
 	       if(data.result!='ok'){
-		 self.showError("Can't enter the room.");
+		 self.room.showError("Can't enter the room.");
 		 return;
 	       }
 	       self.session=data.session;
@@ -289,7 +289,7 @@ NetworkController.prototype={
 	       cb&&cb();
 	     },
 	     error: function(XMLHttpRequest, textStatus, errorThrown){
-	       self.showError("Can't enter the room. ("+textStatus+")");
+	       self.room.showError("Can't enter the room. ("+textStatus+")");
 	     }
 	   });
   },
@@ -320,7 +320,7 @@ NetworkController.prototype={
       dataType: "json",
       success: function(data){
 	if(data.result!='ok'){
-	  self.showError("Can't send the message.");
+	  self.room.showError("Can't send the message.");
 	}
 	switch(type){
 	case "message":
@@ -333,7 +333,6 @@ NetworkController.prototype={
 	case "topic":
 	  break;
 	default:
-	  console&&console.error("unsopported type");
 	  throw "unsopported type";
 	}
 	self.request_processing=false;
@@ -342,9 +341,8 @@ NetworkController.prototype={
       error: function(XMLHttpRequest,
 		      textStatus,
 		      errorThrown){
-	console&&console.log("Can't send the message.");
-	self.showError("Can't send the message. ("+
-		       textStatus+")");
+	self.room.showError("Can't send the message. ("+
+			    textStatus+","+errorThrown+")");
 	self.request_processing=false;
 	self.processQueue();
       }
