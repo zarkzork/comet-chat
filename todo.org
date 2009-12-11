@@ -10,22 +10,31 @@ it's so cool please don't break it.
   - [ ] room enter event && get_mates
   - [ ] room_leave event && get_mates
 * bugs
-** text not always deletes after message arives
-   add message id to typers and messages and make them queled.
-** idle failure
-   one some computers (home one) after long idle time polling stops working
-** most browsers do not implements canvas text api so logo must be redone.  
-** text don't fades away always.
+- idle failure
+- one some computers (home one) after long idle time polling stops working
+-
+- most browsers do not implements canvas text api so logo must be redone.  
+- text don't fades away always.
+-
+- text not always deletes after message arrives
 * features
-** zark-zork joke machine
-  Let server create very rare messages something like.
-  server: i'm so tired of reading logs. I'wish someone said that i'm
-  so cool and nobody did. And if someone did, i could not tell nobody
-  becouse they say i should keep your privasy. I't so hard beeing
-  server.
-** when name duplicates show error.
-** add mutex on all operations that change class variables
-** leave room link
-** when leaving via timeout show last message
-** -1- missed messages flag in the title
-   use window.onblur and window.onfocus
+- nickname validation ?
+- - not allow long nicknames
+- - not allow spaces in the begin or end
+- meaning-full error names
+- error messages should also fade away.
+- make limit on message side both for client and server side. ?
+- zark-zork joke machine
+-Let server create very rare messages something like.
+-server: i'm so tired of reading logs. I'wish someone said that i'm
+-so cool and nobody did. And if someone did, i could not tell nobody
+-becouse they say i should keep your privasy. I't so hard beeing
+-server.
+- when name duplicates show error.
+- add mutex on all operations that change class variables
+- leave room link for browsers which don't support onunload event.
+- when leaving via timeout show last message
+- -1- missed messages flag in the title
+- use window.onblur and window.onfocus
+-
+- link and image auto detection.
