@@ -10,9 +10,10 @@ it's so cool please don't break it.
   - [ ] room enter event && get_mates
   - [ ] room_leave event && get_mates
 * bugs
+- chat html5 enabling script
 - idle failure
 - one some computers (home one) after long idle time polling stops working
--
+ (possible too small idle timeout)
 - most browsers do not implements canvas text api so logo must be redone.  
 - text don't fades away always.
 -
