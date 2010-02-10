@@ -1,4 +1,5 @@
 require 'monitor' 
+require 'logger'
 
 #Thread.abort_on_exception=true
 
@@ -21,6 +22,8 @@ class Activity_tracker
     # default values
     @tresholds=10
     @timeout=40
+    @logger=Logger.new('activity_tracker.log')
+    @logger.info "Activity tracker started."
   end
 
   def tick_time
@@ -29,6 +32,7 @@ class Activity_tracker
 
   # start waiting for event to be triggered
   def launch
+    @logger.info "Thread started."
     Thread.new do
       start_time=nil
       finish_time=nil
@@ -47,19 +51,19 @@ class Activity_tracker
   end
 
   def done(key)
+    @logger.info "Done. Key:"+key.inspect
     @hash.delete key
     @on_expire.call key
   end
 
-  def active(id)
-    # debug output
-    # puts Time.now.to_s+' key '+id.to_s+' now active'
+  def active(key)
+    @logger.info "Active. Key: "+key.inspect
     need_to_launch=false
     @hash.synchronize do
       if @hash.size==0
         need_to_launch=true
       end
-      @hash[id]=1
+      @hash[key]=1
     end
     if need_to_launch
       launch
@@ -74,6 +78,7 @@ class Activity_tracker
       @hash[key]=value+1
       # puts Time.now.to_s+" key "+key.to_s+" has value "+@hash[key].to_s
       if value>=@tresholds
+        @logger.info "Expired. Key: "+key.inspect
         @hash.delete key
         @on_expire.call key
       end
