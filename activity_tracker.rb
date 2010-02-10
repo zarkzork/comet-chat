@@ -4,7 +4,7 @@ require 'monitor'
 
 # activity tracker is a class used to generate events when mate is
 # not active for some time. Class recieve triggers when something is
-# active and after specific timeout chxoecks if someone idle long
+# active and after specific timeout checks if someone idle long
 # enough. Accuracy is timeout/tresholds
 
 class Activity_tracker
@@ -12,9 +12,9 @@ class Activity_tracker
   attr :tresholds
   # is timeout in seconds after which trigger should arise
   attr :timeout
-  
-  def initialize(&action)
-    @action=action
+
+  def initialize(&on_expire)
+    @on_expire=on_expire # action to do when session is expired
     @hash=Hash.new
     @hash.extend(MonitorMixin)
     @cv=@hash.new_cond
@@ -48,7 +48,7 @@ class Activity_tracker
 
   def done(key)
     @hash.delete key
-    @action.call key
+    @on_expire.call key
   end
 
   def active(id)
@@ -75,7 +75,7 @@ class Activity_tracker
       # puts Time.now.to_s+" key "+key.to_s+" has value "+@hash[key].to_s
       if value>=@tresholds
         @hash.delete key
-        @action.call key
+        @on_expire.call key
       end
     end
   end

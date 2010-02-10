@@ -43,7 +43,9 @@ class Comet_chat < Sinatra::Base
 
   def initialize
     @active_rooms={}
+
     @activity_tracker=Activity_tracker.new do |hash|
+      # this block is called when activity timeout for room is expired
       session=get_session(hash[:room], hash[:session])
       session.active_room.post_event Mate_event.new(session.name, :left)
       session.active_room.remove session.hexdigest
