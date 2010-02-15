@@ -1,36 +1,28 @@
 comet online zarkzork-based html5 webchat
 it's so cool please don't break it.
-* json api Tests [14%]
-  CLOSED: [2009-11-24 Tue 11:17]
-  - [X] simple message
-  - [ ] simple typer
-  - [ ] topic event
-  - [ ] room with 8 people and make shure that all get events
-  - [ ] simple dialog
-  - [ ] room enter event && get_mates
-  - [ ] room_leave event && get_mates
 * bugs
-- chat html5 enabling script
-- idle failure
-- one some computers (home one) after long idle time polling stops working
- (possible too small idle timeout)
-- most browsers do not implements canvas text api so logo must be redone.  
-- text don't fades away always.
--
-- text not always deletes after message arrives
+** chat html5 enabling script
+   required for ie
+** idle failure
+   one some computers (home one) after long idle time polling stops working
+   (possible too small idle timeout)
+** most browsers do not implements canvas text api so logo must be redone.  
+** text don't fades away always.
+** text not always deletes after message arrives
+** ? bug   
 * features
 - nickname validation ?
-- - not allow long nicknames
-- - not allow spaces in the begin or end
+ - not allow long nicknames
+ - not allow spaces in the begin or end
 - meaning-full error names
 - error messages should also fade away.
 - make limit on message side both for client and server side. ?
 - zark-zork joke machine
--Let server create very rare messages something like.
--server: i'm so tired of reading logs. I'wish someone said that i'm
--so cool and nobody did. And if someone did, i could not tell nobody
--becouse they say i should keep your privasy. I't so hard beeing
--server.
+  Let server create very rare messages something like.
+  server: i'm so tired of reading logs. I'wish someone said that I'm
+  so cool and nobody did. And if someone did, i could not tell nobody
+  because they say i should keep your privasy. I't so hard being
+  server.
 - when name duplicates show error.
 - add mutex on all operations that change class variables
 - leave room link for browsers which don't support onunload event.

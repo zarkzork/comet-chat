@@ -1,4 +1,5 @@
 require 'digest/md5'
+require 'json_test'
 
 # as current activity tests takes signigicant amount of time they will
 # be done only if file or test will be changed
@@ -27,5 +28,5 @@ if current_activity_tests_md5!=old_activity_test_md5||
   end
 end
 # this values are part of the test suite do not delete
-###activity_md5:b47d6c3ae3fbbf63564823041346b4c2
+###activity_md5:fa6b60dfb7ca22e091a812fbe2681848
 ###activity_test_md5:bdc238722d81db891e3796740843f1bf

@@ -5,7 +5,6 @@ function Message(from, text, type){
   this.from=from;
   this.text=text;
   this.type=type;
-  this.id=name+text+type+Math.floor(Math.random()*100000);//dummy
   return this;
 }
 
@@ -273,11 +272,12 @@ NetworkController.prototype={
   /* enters to room and gets session id */
   enter: function(name, cb){
     var self=this;
+    var escaped_name=encodeURIComponent(name);
     $.ajax({
 	     type: "GET",
 	     cache: false,
 	     url: "/json/"+this.room_id+"/enter",
-	     data: "name="+name,
+	     data: "name="+escaped_name,
 	     dataType: "json",
 	     success: function(data){
 	       if(data.result!='ok'){
@@ -305,9 +305,10 @@ NetworkController.prototype={
   },
 
 
-  /* private function to generate request objects for jquery ajax requests for message, typer, and topic change */  
+  /* function to generate request objects for jquery ajax requests for message, typer, and topic change */  
   _createAJAXMessage: function(type, text){
     var self=this;
+    var escaped_text=encodeURIComponent(text);
     return {
       /* this property is needed just for processQueue() */
       typer: type=="typer",
@@ -316,7 +317,7 @@ NetworkController.prototype={
       cache: false,
       url: "/json/"+this.room_id+"/"+type,
       data: "session="+this.session+"&"+
-	"message="+text,
+	"message="+escaped_text,
       dataType: "json",
       success: function(data){
 	if(data.result!='ok'){
@@ -447,7 +448,7 @@ Messages.prototype={
     switch(message.type){
     case "message":
       $("#"+"typer_"+message.from).remove();
-      $("#chat").append(li.attr("id", message.id));
+      $("#chat").append(li);
       break;
     case "typer":
       var old_typer=$("#"+"typer_"+message.from);

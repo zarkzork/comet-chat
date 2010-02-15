@@ -34,16 +34,24 @@ class Comet_chat < Sinatra::Base
       validate room_digest, :room_digest
       validate session_digest, :session_digest
       room=@active_rooms[room_digest]
-      throw :halt, [503, {'result' => 'error'}.to_json] if !room
+      throw :halt, [503, {
+                      'result' => 'error',
+                      'message' => 'There is no such room.'
+                    }.to_json] if !room
       result=room[session_digest]
-      throw :halt, [503, {'result' => 'error'}.to_json] if !result
+      throw :halt, [503, {
+                      'result' => 'error',
+                      'message' => 'There is no such user in the room.'
+                    }.to_json] if !result
       result
     end
   end
 
   def initialize
     @active_rooms={}
+
     @activity_tracker=Activity_tracker.new do |hash|
+      # this block is called when activity timeout for room is expired
       session=get_session(hash[:room], hash[:session])
       session.active_room.post_event Mate_event.new(session.name, :left)
       session.active_room.remove session.hexdigest
