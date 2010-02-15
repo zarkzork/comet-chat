@@ -34,9 +34,15 @@ class Comet_chat < Sinatra::Base
       validate room_digest, :room_digest
       validate session_digest, :session_digest
       room=@active_rooms[room_digest]
-      throw :halt, [503, {'result' => 'error'}.to_json] if !room
+      throw :halt, [503, {
+                      'result' => 'error',
+                      'message' => 'There is no such room.'
+                    }.to_json] if !room
       result=room[session_digest]
-      throw :halt, [503, {'result' => 'error'}.to_json] if !result
+      throw :halt, [503, {
+                      'result' => 'error',
+                      'message' => 'There is no such user in the room.'
+                    }.to_json] if !result
       result
     end
   end
