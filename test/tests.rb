@@ -4,7 +4,7 @@ require 'json_test'
 # as current activity tests takes signigicant amount of time they will
 # be done only if file or test will be changed
 current_activity_md5=
-  Digest::MD5.hexdigest(IO.read('activity_tracker.rb'))
+  Digest::MD5.hexdigest(IO.read('../lib/activity_tracker.rb'))
 current_activity_tests_md5=
   Digest::MD5.hexdigest(IO.read('activity_tracker_test.rb'))
 this_file=IO.read(__FILE__)
@@ -28,5 +28,5 @@ if current_activity_tests_md5!=old_activity_test_md5||
   end
 end
 # this values are part of the test suite do not delete
-###activity_md5:fa6b60dfb7ca22e091a812fbe2681848
-###activity_test_md5:bdc238722d81db891e3796740843f1bf
+###activity_md5:8fdb910fe5586d61dce1590e755e9e15
+###activity_test_md5:dfc652d68df8cf3e7493ede131bbb966

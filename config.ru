@@ -1,4 +1,4 @@
-require 'comet-chat'
+require 'lib/comet-chat'
 
 ENV['RACK_ENV'] = "production"
 Comet_chat.configure do |app|
@@ -6,3 +6,4 @@ Comet_chat.configure do |app|
  end
 
 run Comet_chat.new
+

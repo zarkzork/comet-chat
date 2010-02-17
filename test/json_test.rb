@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'rubygems'
 require 'rack/test'
-require 'comet-chat'
+require '../lib/comet-chat'
 require 'json'
 
 # redefine default WAIT_TIMEOUT constant to speed up test passing
