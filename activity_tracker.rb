@@ -1,5 +1,4 @@
 require 'monitor' 
-require 'logger'
 
 #Thread.abort_on_exception=true
 
@@ -9,10 +8,13 @@ require 'logger'
 # enough. Accuracy is timeout/tresholds
 
 class Activity_tracker
-  # number of tresholds that should pass before trigger will be active
-  attr :tresholds
-  # is timeout in seconds after which trigger should arise
-  attr :timeout
+  # :tresholds -- number of tresholds that should pass before trigger will be active
+  # :timoeout -- is timeout in seconds after which trigger should arise
+  attr_accessor :tresholds, :timeout
+
+  def tick_time
+    @timeout.to_f/@tresholds
+  end
 
   def initialize(&on_expire)
     @on_expire=on_expire # action to do when session is expired
@@ -21,18 +23,41 @@ class Activity_tracker
     @cv=@hash.new_cond
     # default values
     @tresholds=10
-    @timeout=40
-    @logger=Logger.new('activity_tracker.log')
-    @logger.info "Activity tracker started."
+    @timeout=80
   end
 
-  def tick_time
-    @timeout.to_f/@tresholds
+  def done(key)
+    @hash.delete key
+    @on_expire.call key
+  end
+
+  def active(key)
+    need_to_launch=false
+    @hash.synchronize do
+      if @hash.size==0
+        need_to_launch=true
+      end
+      @hash[key]=1
+    end
+    if need_to_launch
+      launch
+    end
+  end
+
+  protected
+  # call block if enough tresholds passed to call on expire action 
+  def checker
+    @hash.each_pair do |key, value|
+      @hash[key]=value+1
+      if value>=@tresholds
+        @hash.delete key
+        @on_expire.call key
+      end
+    end
   end
 
   # start waiting for event to be triggered
   def launch
-    @logger.info "Thread started."
     Thread.new do
       start_time=nil
       finish_time=nil
@@ -50,38 +75,4 @@ class Activity_tracker
     end
   end
 
-  def done(key)
-    @logger.info "Done. Key:"+key.inspect
-    @hash.delete key
-    @on_expire.call key
-  end
-
-  def active(key)
-    @logger.info "Active. Key: "+key.inspect
-    need_to_launch=false
-    @hash.synchronize do
-      if @hash.size==0
-        need_to_launch=true
-      end
-      @hash[key]=1
-    end
-    if need_to_launch
-      launch
-    end
-  end
-
-  protected
-  # debug output
-  # call block if enough tresholds passed
-  def checker
-    @hash.each_pair do |key, value|
-      @hash[key]=value+1
-      # puts Time.now.to_s+" key "+key.to_s+" has value "+@hash[key].to_s
-      if value>=@tresholds
-        @logger.info "Expired. Key: "+key.inspect
-        @hash.delete key
-        @on_expire.call key
-      end
-    end
-  end
 end
