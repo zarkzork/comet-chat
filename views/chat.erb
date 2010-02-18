@@ -7,13 +7,26 @@
     <link rel="stylesheet" href="css/chat.css" type="text/css" media="screen" />
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
+    <!-- Take that IE -->
+    <!--[if IE]>
+    <script>
+      /* create for ie html5 elements. */
+      var e = ("abbr,article,aside,audio,canvas,datalist,details," +
+      "figure,footer,header,hgroup,mark,menu,meter,nav,output," +
+      "progress,section,time,video").split(',');
+      for (var i = 0; i < e.length; i++) {
+      document.createElement(e[i]);
+      }
+    </script>
+    <![endif]-->
   </head>
   <body>
     <section id="enter_section"> 
      <form>
-	<label>enter you name</label>
-	<input type="text" value="" id="mate_name"/>
-	<input type="submit" value="go" id="enter_room"/>  
+       <p class="enter_message"></p>
+       <label>enter you name:</label>
+       <input type="text" value="" id="mate_name"/>
+       <input type="submit" value="go" id="enter_room"/>  
       </form>
     </section>
     <section id="chat_section">

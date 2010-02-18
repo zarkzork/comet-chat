@@ -25,6 +25,13 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
     -moz-border-radius: 10px;
 }
 
+#enter_section .enter_message{
+    text-align: center;
+    margin-bottom: 20px;
+    color: red;
+    display: none;
+}
+
 #chat_section{
 }
 

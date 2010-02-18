@@ -31,80 +31,158 @@ Message.prototype={
   }
 };
 
-/* main object that represents room */
+/* main object that represents chat room */
 function Room(id, name){
-  var self=this;
   this.room_id=id;
-  /* that very man who is about to enter this room */
+  this.name=name;
+  /* person who about to enter this room */
   this.self=null;
-  /* topic object to control topic representation */
+  /* topic object to control topic representation */  
   this.topic=new Topic("");
-  /* same for messages */
-  this.messages=new Messages();
   /* and mates */
   this.mates=new Mates([]);
+  /* same for messages */
+  this.messages=new Messages();
+  /* true when user leaves pages open while visiting other pages. */
+  this.hidden=false;
   this.network_controller=new NetworkController(this);
-  this.makeInputBox(function(value, isFinal){
-		      var nc=self.network_controller;
-		      nc.postMessage(value, isFinal);
-		      if(isFinal){
-			self.clearInputBox();
-		      }
-		    });
-  this.topic.onChange=
-    function(value, isFinal){
-      var nc=self.network_controller;
-      nc.topicChange(value);
-    };
-  this.mates.whenAlone(function(isAlone){
-			 if(isAlone){
-			   self.showHelp();
-			 }else{
-			   self.hideHelp();
-			 }
-		     });
-  $(window).unload(function(){
-  		     self.network_controller.leave();
-  		   });
-  /* enter the room and get its mates */
-  this.network_controller.enter(name,
-	     function(){
-	       self.network_controller.getMates(
-		 function(){
-		   $("#connecting").hide();
-		   $("#chat_section").show();
-		   $("#input_line").focus();	
-		   self.network_controller.startProcessing(
-		     function(event){
-		       self.network_controller.process(event);
-		     }
-		   );
-		 }
-	       );
-	     });
+  this.controlsInit();
+  this.networkInit();
 }
 
 Room.prototype={
+  networkInit: function(){
+    var self=this;
+    /* leave room when winwow unloads */
+    $(window).unload(function(){
+  		       self.network_controller.leave();
+  		     });
+    /* enter the room and get its mates */
+    this.network_controller.enter(this.name,
+				  function(result){
+				    switch(result){
+				    case "duplicate":
+				      gate.show("This name is taken. Take another try.");
+				      self.unbind();
+				      break;
+				    case "error":
+				      gate.show("Something bad happened. Lets try again!");
+				      self.unbind();
+				      break;
+				    case "ok":
+				      self.network_controller.getMates(
+					function(){
+					  $("#connecting").hide();
+					  $("#chat_section").show();
+					  $("#input_line").focus();	
+					  self.network_controller.startProcessing(
+					    function(event){
+					      self.process(event);
+					    }
+					  );
+					}
+				      );
+				      break;
+				    default:
+				      self.unbind();
+				      alert("Something really bad happened. Reload window. I hope it helps.");
+				    }
+				  });    
+  },
+
+  controlsInit: function(){
+    var self=this;
+    this.makeInputBox(function(value, isFinal){
+			var nc=self.network_controller;
+			nc.postMessage(value, isFinal);
+			if(isFinal){
+			  self.clearInputBox();
+			}
+		      });
+    this.topic.onChange=
+      function(value, isFinal){
+	var nc=self.network_controller;
+	nc.topicChange(value);
+      };
+    this.mates.whenAlone(function(isAlone){
+			   if(isAlone){
+			     self.showHelp();
+			   }else{
+			     self.hideHelp();
+			   }
+			 });
+    $(window).blur(function(){
+		       self.hidden=true;
+		     });
+    $(window).focus(function(){
+			self.hidden=false;
+		      });
+
+  },
+
+  unbind: function(){
+    $.each(["#input_line","#topic"], function(key, val){
+	     $(val).unbind();
+	   });
+  },
+    
   scrollDownChat: function(){
     var height=$("#chat").height();
     height+=$("#typers").height();
     height+=$("#errors").height();
     $("#chat_section .chat_list").get(0).scrollTop=height;
   },
+
+  process: function(event){
+    var mate=null;
+    switch(event.type){
+    case "Message_event":
+      mate=event.author;
+      this.messages.add(new Message(mate, event.message, "message"));
+      break;
+    case "Typer_event":
+      mate=event.author;
+      this.messages.add(new Message(mate, event.message, "typer"));
+      break;
+    case "Topic_event":
+      this.topic.change(event.message);
+      break;
+    case "Mate_event":
+      switch(event.status){
+      case "enter":
+	this.mates.add(event.mate);
+	break;
+      case "left":
+	this.mates.remove(event.mate);
+	break;
+      default:
+	throw "unsoported Mate_event type.";
+      }
+      break;
+    default:
+      throw "unsoported Event type.";
+    }
+    this.scrollDownChat();
+  },
+
   showError: function(text){
     var message=
       new Message(null, text, "error");
     this.messages.add(message);
   },
+  
   showHelp: function(){
     $("#help").show();
   },
+  
   hideHelp: function(){
     $("#help").hide();
   },
+  
   clearInputBox: function(){
     $("#input_line").attr("value","");
   },
+  
   makeInputBox: function(cb){
     typer("#input_line", cb);
     /* when user clicks the button, onedit event is already envoked */
@@ -166,6 +244,8 @@ function testNetworkController(){
 	   });
 }
 
+
+/* Part of room that handles all ajax messages.*/
 function NetworkController(room){
   this.room=room;
   this.room_id=room.room_id;
@@ -181,7 +261,6 @@ function NetworkController(room){
 }
 
 NetworkController.prototype={
-
   getMates: function(cb){
     var self=this;
     $.ajax({
@@ -237,39 +316,8 @@ NetworkController.prototype={
     }
   },
 
-  process: function(event){
-    var mate=null;
-    switch(event.type){
-    case "Message_event":
-      mate=event.author;
-      this.room.messages.add(new Message(mate, event.message, "message"));
-      break;
-    case "Typer_event":
-       mate=event.author;
-      this.room.messages.add(new Message(mate, event.message, "typer"));
-      break;
-    case "Topic_event":
-      this.room.topic.change(event.message);
-      break;
-    case "Mate_event":
-      switch(event.status){
-      case "enter":
-	this.room.mates.add(event.mate);
-	break;
-      case "left":
-	this.room.mates.remove(event.mate);
-	break;
-      default:
-	throw "unsoported Mate_event type.";
-      }
-      break;
-    default:
-      throw "unsoported Event type.";
-    }
-    this.room.scrollDownChat();
-  },
-
   /* enters to room and gets session id */
+  /* callback retuns result of room enter */
   enter: function(name, cb){
     var self=this;
     var escaped_name=encodeURIComponent(name);
@@ -280,13 +328,11 @@ NetworkController.prototype={
 	     data: "name="+escaped_name,
 	     dataType: "json",
 	     success: function(data){
-	       if(data.result!='ok'){
-		 self.room.showError("Can't enter the room.");
-		 return;
+	       if(data.result==="ok"){
+		 self.session=data.session;
+		 self.room.topic.change(data.topic);		 
 	       }
-	       self.session=data.session;
-	       self.room.topic.change(data.topic);
-	       cb&&cb();
+	       cb&&cb(data.result);
 	     },
 	     error: function(XMLHttpRequest, textStatus, errorThrown){
 	       self.room.showError("Can't enter the room. ("+textStatus+")");
@@ -445,14 +491,18 @@ function Messages(){
 Messages.prototype={
   add:function(message){
     var li=message.getLi();
+    var encoded_from="";
+    for (var i=0;i<message.from.length;i++){
+      encoded_from+=message.from.charCodeAt(i);
+    }
     switch(message.type){
     case "message":
-      $("#"+"typer_"+message.from).remove();
+      $("#"+"typer_"+encoded_from).remove();
       $("#chat").append(li);
       break;
     case "typer":
-      var old_typer=$("#"+"typer_"+message.from);
-      li.attr("id", "typer_"+message.from);
+      var old_typer=$("#"+"typer_"+encoded_from);
+      li.attr("id", "typer_"+encoded_from);
       if(old_typer.length!=0){
 	var prev=old_typer.prev();
 	old_typer.after(li);
@@ -521,7 +571,18 @@ function typer(id, cb){
     });
 }
 
-$(function(){
+/* controls first screen. */
+function Gate(){
+  return this;
+}
+
+Gate.prototype={
+  show:function(message){
+    $("#enter_section .enter_message").text(message).show();
+    $("#enter_section").show();
+  },
+  init:function(){
+    var self=this;
     $("#enter_section form").submit(
       function(){
 	$("#enter_section").hide();
@@ -530,5 +591,12 @@ $(function(){
 		 $("#mate_name").attr("value"));
 	return false;
       });
-    $("#mate_name").focus();
+    $("#mate_name").focus();    
+  }
+};
+
+var gate=new Gate();
+
+$(function(){
+    gate.init();
   });

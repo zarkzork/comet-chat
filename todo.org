@@ -9,7 +9,8 @@ it's so cool please don't break it.
 ** most browsers do not implements canvas text api so logo must be redone.  
 ** text don't fades away always.
 ** text not always deletes after message arrives
-** ? bug   
+** DONE ? bug   
+   CLOSED: [2010-02-18 Thu 17:17]
 * features
 - nickname validation ?
  - not allow long nicknames
@@ -28,6 +29,5 @@ it's so cool please don't break it.
 - leave room link for browsers which don't support onunload event.
 - when leaving via timeout show last message
 - -1- missed messages flag in the title
-- use window.onblur and window.onfocus
--
+  use window.onblur and window.onfocus
 - link and image auto detection.
