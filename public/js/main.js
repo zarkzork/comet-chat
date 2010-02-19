@@ -5,12 +5,14 @@ function Message(from, text, type){
   this.from=from;
   this.text=text;
   this.type=type;
+  this.created_at=new Date();
   return this;
 }
 
 Message.prototype={
   /* returns li that will be inserted in proper place of the message board */
   getLi: function(){
+    var self=this;
     var li=$("<li/>")
       .addClass("message");
     if(this.from&&
@@ -27,6 +29,14 @@ Message.prototype={
 	.addClass("message_body")
 	.text(this.text)
     );
+    li.hover(function(){
+	       $(this).append($('<span/>')
+			 .addClass('time')
+			 .text(self.created_at.toLocaleTimeString()));
+	     },
+	     function(){
+	       $(this).children('.time').remove();
+	     });
     return li;
   }
 };
@@ -45,6 +55,8 @@ function Room(id, name){
   this.messages=new Messages();
   /* true when user leaves pages open while visiting other pages. */
   this.hidden=false;
+  /* number of message posted when window blurred */
+  this.counter=0;
   this.network_controller=new NetworkController(this);
   this.controlsInit();
   this.networkInit();
@@ -115,13 +127,14 @@ Room.prototype={
 		       self.hidden=true;
 		     });
     $(window).focus(function(){
-			self.hidden=false;
-		      });
+		      self.hidden=false;
+		      self.removeCounter();  
+		    });
 
   },
 
   unbind: function(){
-    $.each(["#input_line","#topic"], function(key, val){
+    $.each(["#input_line","#topic","window"], function(key, val){
 	     $(val).unbind();
 	   });
   },
@@ -139,6 +152,7 @@ Room.prototype={
     case "Message_event":
       mate=event.author;
       this.messages.add(new Message(mate, event.message, "message"));
+      this.updateCounter();
       break;
     case "Typer_event":
       mate=event.author;
@@ -191,7 +205,21 @@ Room.prototype={
     // 	cb($("#input_line").attr("value"), true);
     //   });
     return this;
-  }  
+  },
+
+  updateCounter: function(){
+    if(this.hidden){
+      this.counter++;
+      document.title=document.title.replace(/(\[\d+\])?(.*)/,
+					    '['+this.counter+']'+"$2");
+    }
+  },
+
+  removeCounter: function(){
+    this.counter=0;
+    document.title=document.title.replace(/\[\d+\](.*)/,"$1");
+  }
+  
 };
 
 function testNetworkController(){

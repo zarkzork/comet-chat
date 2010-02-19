@@ -106,12 +106,18 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
 .message{
     margin-bottom: 5px;
     padding-bottom: 5px;
+    line-height: 1.4;
     border-bottom: 1px dashed #ddd;
 }
 
 .message .from{
     color: #666;
     margin-right: 5px;
+}
+
+.message .time{
+    color: #666;
+    margin-left: 10px;
 }
 
 .message .from:after{
