@@ -116,6 +116,7 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
 }
 
 .message .time{
+    display: none;
     color: #666;
     margin-left: 10px;
 }

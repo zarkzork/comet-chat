@@ -29,13 +29,15 @@ Message.prototype={
 	.addClass("message_body")
 	.text(this.text)
     );
+    li.append(
+      $('<span/>')
+	.addClass('time')
+	.text(self.created_at.toLocaleTimeString()));
     li.hover(function(){
-	       $(this).append($('<span/>')
-			 .addClass('time')
-			 .text(self.created_at.toLocaleTimeString()));
+	       $(this).children('.time').show();
 	     },
 	     function(){
-	       $(this).children('.time').remove();
+	       $(this).children('.time').fadeOut('slow');
 	     });
     return li;
   }
