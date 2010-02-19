@@ -23,6 +23,7 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
     background-color: #333;
     padding: 20px;
     -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
 }
 
 #enter_section .enter_message{
@@ -84,11 +85,14 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
 
 #topic{
     width: 100%;
-    margin-bottom: 20px;
+    margin-right: auto;
+    margin-left: auto;
+    text-align: center;
 }
 
 /* mates section */
 #mates ul{
+    margin-top: 20px;
     padding-bottom: 15px;
 }
 
@@ -100,6 +104,7 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
     background-color: #666;
     padding: 3px;
     -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
 }
 
 /* message style */
@@ -107,7 +112,7 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
     margin-bottom: 5px;
     padding-bottom: 5px;
     line-height: 1.4;
-    border-bottom: 1px dashed #ddd;
+    border-bottom: 1px dashed #ddd;    
 }
 
 .message .from{
@@ -143,9 +148,10 @@ section, article, aside, header, footer, nav, dialog, figure { display:block; }
 /* input style */
 input{
     background-color: transparent;
-    color: inherit;
+    color: #fff;
     border: 1px solid #fff;
     -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
 }
 
 
