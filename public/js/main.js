@@ -201,11 +201,10 @@ Room.prototype={
   
   makeInputBox: function(cb){
     typer("#input_line", cb);
-    /* when user clicks the button, onedit event is already envoked */
-    // $("#send_button").click(
-    //   function(){
-    // 	cb($("#input_line").attr("value"), true);
-    //   });
+    $("#send_button").click(
+      function(){
+    	cb($("#input_line").attr("value"), true);
+      });
     return this;
   },
 
@@ -533,16 +532,16 @@ Messages.prototype={
     case "typer":
       var old_typer=$("#"+"typer_"+encoded_from);
       li.attr("id", "typer_"+encoded_from);
-      if(old_typer.length!=0){
-	var prev=old_typer.prev();
-	old_typer.after(li);
-	old_typer.remove();
-	setTimeout(
+      setTimeout(
 	  function(){
 	    li.fadeOut("slow", function(){
 			 li.remove();
 		       });
-		   }, 10000);
+		   }, 5000);
+      if(old_typer.length!=0){
+	var prev=old_typer.prev();
+	old_typer.after(li);
+	old_typer.remove();
       }else{
 	$("#typers").append(li);
       }
@@ -561,6 +560,7 @@ Messages.prototype={
  not enter*/
 function typer(id, cb){
   var timeout=-1;
+  var previous_value="";
   $(id).keydown(
     function(e){
       var value=$(id).attr("value");
@@ -576,7 +576,7 @@ function typer(id, cb){
   $(id).keyup(
     function(e){
       var value=$(id).attr("value");
-      if(value!=""){
+      if(value!=""||(previous_value!=""&&value=="")){
 	if(timeout!=-1){
 	  clearTimeout(timeout);
 	}
@@ -591,13 +591,7 @@ function typer(id, cb){
 	  }
 	}
       }
-    });
-  $(id).change(
-    function(){
-      var value=$(id).attr("value");
-      if(value!=""){
-	cb&&cb(value, true);
-      }
+      previous_value=value;
     });
 }
 
