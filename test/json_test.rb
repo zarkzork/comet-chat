@@ -112,4 +112,13 @@ class JSON_test < Test::Unit::TestCase
     assert result==["zork"]
   end
 
+  def test_leave
+    session1=enter_the_room 'zark'
+    session2=enter_the_room 'zork'
+    get 'json/'+@room_name+'/leave', { :session => session1 }
+    assert last_response.ok?, "response was:"+last_response.body
+    mates=get_mates session2
+    assert mates==['zork']
+  end
+
 end
