@@ -27,8 +27,10 @@ class Activity_tracker
   end
 
   def done(key)
-    @hash.delete key
-    @on_expire.call key
+    @hash.synchronize do
+      @hash.delete key
+      @on_expire.call key
+    end
   end
 
   def active(key)
