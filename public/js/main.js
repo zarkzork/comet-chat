@@ -392,7 +392,7 @@ NetworkController.prototype={
       /* this property is needed just for processQueue() */
       typer: type=="typer",
       /* standart jquery ajax properties */
-      type: "GET",
+      type: "POST",
       cache: false,
       url: "/json/"+this.room_id+"/"+type,
       data: "session="+this.session+"&"+

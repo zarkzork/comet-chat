@@ -136,7 +136,7 @@ class Comet_chat < Sinatra::Base
   # message and topic event handling
   #
 
-  get '/json/:room/:type' do
+  message_route_proc=lambda do
     pass unless %w[message typer topic].include? params[:type]
     room = params[:room]
     session_digest = params[:session]
@@ -154,6 +154,9 @@ class Comet_chat < Sinatra::Base
     session.active_room.post_event(event)
     {'result' => 'ok'}.to_json
   end
+  
+  get '/json/:room/:type', &message_route_proc
+  post '/json/:room/:type', &message_route_proc
 
   # return room chat page
   get '/:room' do
