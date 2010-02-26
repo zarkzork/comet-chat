@@ -83,6 +83,10 @@ Room.prototype={
 				      gate.show("Something bad happened. Lets try again!");
 				      self.unbind();
 				      break;
+				    case 'empty':
+				      gate.show("Name cannot be empty.");
+				      self.unbind();
+				      break;
 				    case "ok":
 				      self.network_controller.getMates(
 					function(){

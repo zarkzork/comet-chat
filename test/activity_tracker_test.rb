@@ -1,5 +1,5 @@
 require 'test/unit'
-require '../lib/comet-chat'
+require 'lib/comet-chat'
 
 class Activity_tracker_test < Test::Unit::TestCase
   

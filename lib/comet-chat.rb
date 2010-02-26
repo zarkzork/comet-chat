@@ -23,7 +23,8 @@ class Comet_chat < Sinatra::Base
       if string !~ /^[a-zA-Z0-9_]+$/
         message=custom_message||"wrong symbol or"+
           " param missing: "+name.inspect
-        throw :halt, [503, message]
+        throw :halt, [503, {'result' => 'error',
+                        'message' => message}.to_json]
       end
     end
 
@@ -52,7 +53,6 @@ class Comet_chat < Sinatra::Base
 
   def initialize
     @active_rooms={}
-
     @activity_tracker=Activity_tracker.new do |hash|
       # this block is called when activity timeout for room is expired
       session=get_session(hash[:room], hash[:session])
@@ -60,6 +60,7 @@ class Comet_chat < Sinatra::Base
       session.active_room.remove session.hexdigest
       @active_rooms.delete hash[:room] if session.active_room.empty?
     end
+    @activity_tracker.timeout=Active_session::WAIT_TIMEOUT*3
   end
 
   get '/' do
@@ -71,6 +72,7 @@ class Comet_chat < Sinatra::Base
     name=params[:name]
     validate room, :room
     name=sanitize name
+    throw :halt, [503, {'result' => 'empty'}.to_json] if name.empty?
     active_room=@active_rooms[room]
     if !active_room
       @active_rooms[room]=active_room=Active_room.new
@@ -94,7 +96,10 @@ class Comet_chat < Sinatra::Base
     session_digest=params[:session]
     session=get_session(room, session_digest )
     @activity_tracker.done({:room => room,
-                               :session => session_digest})
+                             :session => session_digest})
+    {
+      'result' => 'ok'
+    }.to_json
   end
   
   get '/json/:room/mates' do

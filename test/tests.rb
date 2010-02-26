@@ -1,12 +1,12 @@
 require 'digest/md5'
-require 'json_test'
+require 'test/json_test'
 
 # as current activity tests takes signigicant amount of time they will
 # be done only if file or test will be changed
 current_activity_md5=
-  Digest::MD5.hexdigest(IO.read('../lib/activity_tracker.rb'))
+  Digest::MD5.hexdigest(IO.read('/lib/activity_tracker.rb'))
 current_activity_tests_md5=
-  Digest::MD5.hexdigest(IO.read('activity_tracker_test.rb'))
+  Digest::MD5.hexdigest(IO.read('/test/activity_tracker_test.rb'))
 this_file=IO.read(__FILE__)
 activity_pattern=/##+activity_md5:(.*)$/
 test_pattern=/##+activity_test_md5:(.*)$/
@@ -18,7 +18,7 @@ if current_activity_tests_md5!=old_activity_test_md5||
     current_activity_md5!=old_activity_md5
   puts 'Activity class or tests changed so it will be started.'
   puts 'be patient'
-  require 'activity_tracker_test'
+  require 'test/activity_tracker_test'
   this_file.sub!(activity_pattern, '###activity'+
                  '_md5:'+current_activity_md5)
   this_file.sub!(test_pattern, '###activity'+
