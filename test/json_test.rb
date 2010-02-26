@@ -63,17 +63,10 @@ class JSON_test < Test::Unit::TestCase
 
   # Simple chat session test.
   def test_simple_message_session
-    session1=enter_the_room("1")['session']
-    session2=enter_the_room("2")['session']
-    t=Thread.new do
-      result=get_event(session2)
-      assert result["author"]=="1", "wrong author"
-      assert result["type"]=="Message_event", "wrong type"
-      assert result["message"]=="tst", "wrong message"
+    [:typer, :message, :topic].each do |type|
+      @room_name=type.to_s
+      simple_session type
     end
-    sleep 0.1
-    message(session1, 'tst')
-    t.join
   end
 
   # Test that room returns propers mates.
@@ -83,7 +76,7 @@ class JSON_test < Test::Unit::TestCase
     @room_name="zz"
     # add dude that will left by timeout
     enter_the_room "a"
-    sleep Active_session::WAIT_TIMEOUT*6
+    sleep Active_session::WAIT_TIMEOUT*4
     # enter and the leave
     session=enter_the_room("leaver")["session"]
     leave session
@@ -144,5 +137,28 @@ class JSON_test < Test::Unit::TestCase
   def typer(session, message, options={})
     json_request "message", {:session => session,
       :message => message}, options
+  end
+
+  # Post topic event to chat. Options will be used in +json_request()+
+  def topic(session, message, options={})
+    json_request "topic", {:session => session,
+      :message => message}, options
+  end
+
+  # Simple message exchange between two users
+  def simple_session(message_type=:message)
+    type_expected =
+      message_type == :topic ? "Topic_event" : "Message_event"
+    session1=enter_the_room("1")['session']
+    session2=enter_the_room("2")['session']
+    t=Thread.new do
+      result=get_event(session2)["event"]
+      assert_equal "1",result["author"]
+      assert_equal type_expected, result["type"] 
+      assert_equal "tst", result["message"]
+    end
+    sleep 0.1
+    send(message_type, session1, 'tst')
+    t.join
   end
 end

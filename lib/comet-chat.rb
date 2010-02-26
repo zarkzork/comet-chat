@@ -82,6 +82,8 @@ class Comet_chat < Sinatra::Base
       end
     end
     session=active_room.enter(name)
+    @activity_tracker.active({:room => room,
+                               :session => session.hexdigest})
     enter_event=Mate_event.new(name, :enter)
     session.active_room.post_event(enter_event)
     {
