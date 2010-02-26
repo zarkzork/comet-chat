@@ -135,34 +135,23 @@ class Comet_chat < Sinatra::Base
   #
   # message and topic event handling
   #
-  
-  get '/json/:room/message' do
-    room=params[:room]
-    session_digest=params[:session]
-    session=get_session(room, session_digest )
-    message=params[:message]
-    message=sanitize message
-    message_event=Message_event.new(session.name, message)
-    session.active_room.post_event(message_event)
-    {'result' => 'ok'}.to_json
-  end
 
-  get '/json/:room/typer' do
-    session=get_session(params[:room], params[:session])
-    message=params[:message]
-    message=sanitize message
-    typer_event=Typer_event.new(session.name, message)
-    session.active_room.post_event(typer_event)
-    {'result' => 'ok'}.to_json
-  end
-
-  get '/json/:room/topic' do
-    session=get_session(params[:room], params[:session])
-    message=params[:message]
-    message=sanitize message
-    topic_event=Topic_event.new(session.name, message)
-    session.active_room.post_event(topic_event)
-    session.active_room.topic=message
+  get '/json/:room/:type' do
+    pass unless %w[message typer topic].include? params[:type]
+    room = params[:room]
+    session_digest = params[:session]
+    session = get_session(room, session_digest )
+    message = params[:message]
+    message = sanitize message
+    event = case params[:type]
+            when "message"
+              Message_event.new(session.name, message)
+            when "typer"
+              Typer_event.new(session.name, message)
+            when "topic"
+              Topic_event.new(session.name, message)
+            end
+    session.active_room.post_event(event)
     {'result' => 'ok'}.to_json
   end
 
