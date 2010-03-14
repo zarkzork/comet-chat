@@ -1,0 +1,7 @@
+This is comet-based chat.
+
+All comet stuff is managed inside of application, no additional
+frameworks was used.
+
+Warning chat works only with web servers which make new thread on each
+connection (Mongrel or webrick do). 
