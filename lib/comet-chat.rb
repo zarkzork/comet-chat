@@ -12,7 +12,6 @@ require 'events'
 require 'activity_tracker'
 
 class Comet_chat < Sinatra::Base
-  enable :static
 
   helpers do
 

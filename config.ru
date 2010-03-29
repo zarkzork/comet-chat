@@ -3,7 +3,8 @@ require 'lib/comet-chat'
 ENV['RACK_ENV'] = "production"
 Comet_chat.configure do |app|
    app.set :root, Dir.pwd
- end
+end
+
+use Rack::Static, :urls => ["/css", "/img", "/js"], :root => "public"
 
 run Comet_chat.new
-
